@@ -1,6 +1,8 @@
 name: Conseguir Licencia Manual
 on: 
-  workflow_dispatch: {}
+  push:
+    branches:
+      - develop
 jobs:
   conseguir-licencia:
     runs-on: ubuntu-latest
