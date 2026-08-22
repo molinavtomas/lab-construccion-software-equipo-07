@@ -18,6 +18,7 @@
 *.suo
 *.user
 *.userprefs
+*.slnx
 
 # OS generated files
 .DS_Store
