@@ -17,7 +17,7 @@ public class ZonaMuerte : MonoBehaviour
                 rb.position = puntoDeRespawn.position;
 
                 // Le matamos la inercia para que no siga cayendo como un meteorito al reaparecer
-                rb.velocity = Vector3.zero;
+                rb.linearVelocity = Vector3.zero;
             }
         }
     }
