@@ -17,6 +17,8 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundMask;
     public Grappling grappling;
 
+    private bool kicked;
+
     private Rigidbody rb;
 
     void Start()
@@ -35,27 +37,18 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // Variable para controlar el bloqueo tras el golpe
-    private float knockbackTimer = 0f;
-
-    public void RecibirEmpuje(Vector3 fuerzaEmpuje, float duracionBloqueo = 0.35f)
+    public void RecibirEmpuje(Vector3 fuerzaEmpuje)
     {
-        knockbackTimer = duracionBloqueo;
         rb.linearVelocity = Vector3.zero; // Limpiar inercia previa
         rb.AddForce(fuerzaEmpuje, ForceMode.Impulse);
+        kicked = true;
     }
 
     void FixedUpdate()
     {
-        if (grappling != null && grappling.IsGrappling())
+        if (kicked)
             return;
 
-        // Si está bajo el efecto del empuje, no sobreescribir la velocidad con WASD
-        if (knockbackTimer > 0)
-        {
-            knockbackTimer -= Time.fixedDeltaTime;
-            return;
-        }
         if (grappling != null && grappling.IsGrappling())
             return;
         Vector2 input = Vector2.zero;

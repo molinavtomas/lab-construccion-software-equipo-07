@@ -60,7 +60,7 @@ public class MovimientoEsferaX : MonoBehaviour
                 Vector3 fuerzaFinal = (direccionEmpuje * fuerzaEmpuje) + (Vector3.up * fuerzaArriba);
 
                 // 6. Aplicar empuje y pausar el control por 0.35 segundos
-                jugador.RecibirEmpuje(fuerzaFinal, 0.35f);
+                jugador.RecibirEmpuje(fuerzaFinal);
 
                 Debug.Log($"Esfera impactó al jugador con fuerza: {fuerzaFinal}");
             }

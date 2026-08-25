@@ -53,7 +53,7 @@ public class Hacha : MonoBehaviour
                 // Vector final: lateral puro + pequeña elevación
                 Vector3 fuerzaFinal = (direccionLateral * fuerzaEmpujeLateral) + (Vector3.up * fuerzaArriba);
 
-                jugador.RecibirEmpuje(fuerzaFinal, 0.35f);
+                jugador.RecibirEmpuje(fuerzaFinal);
             }
         }
     }
