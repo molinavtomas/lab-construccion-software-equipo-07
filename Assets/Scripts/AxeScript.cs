@@ -2,23 +2,24 @@ using UnityEngine;
 
 public class Hacha : MonoBehaviour
 {
-    [Header("Configuración del Hacha")]
-    [Tooltip("Ángulo máximo de inclinación hacia cada lado")]
+    [Header("Configuración del Péndulo")]
     [SerializeField] private float maxAngle = 75f;
-
-    [Tooltip("Velocidad de oscilación")]
     [SerializeField] private float speed = 2.5f;
-
-    [Tooltip("Eje sobre el cual oscilará (X o Z habitualmente)")]
     [SerializeField] private Vector3 rotationAxis = Vector3.forward;
 
-    [Tooltip("Magnitud del empuje")]
-    [SerializeField] private float fuerzaEmpuje = 18f;
+    [Header("Configuración del Empuje Lateral")]
+    [Tooltip("Fuerza horizontal hacia los lados")]
+    [SerializeField] private float fuerzaEmpujeLateral = 15f;
 
-    [Tooltip("Fuerza vertical adicional para levantar al jugador")]
-    [SerializeField] private float impulsoVertical = 4f;
+    [Tooltip("Fuerza hacia arriba")]
+    [SerializeField] private float fuerzaArriba = 2f;
+
+    [SerializeField] private float cooldownGolpe = 0.5f;
 
     private Quaternion initialRotation;
+    private float ultimoGolpe = -1f;
+    private float anguloPrevio = 0f;
+    private float sentidoMovimiento = 1f;
 
     private void Start()
     {
@@ -27,34 +28,32 @@ public class Hacha : MonoBehaviour
 
     private void Update()
     {
-        // Movimiento armónico de vaivén (Péndulo sinusoidal)
         float angle = Mathf.Sin(Time.time * speed) * maxAngle;
+
+        // 1 = moviéndose a la derecha, -1 = moviéndose a la izquierda
+        sentidoMovimiento = (angle >= anguloPrevio) ? 1f : -1f;
+        anguloPrevio = angle;
+
         transform.localRotation = initialRotation * Quaternion.AngleAxis(angle, rotationAxis);
     }
+
     private void OnTriggerEnter(Collider other)
     {
-        // 1. Validar que el objeto impactado sea el jugador
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && Time.time > ultimoGolpe + cooldownGolpe)
         {
-            // 2. Obtener el Rigidbody del jugador
-            Rigidbody rbJugador = other.GetComponent<Rigidbody>();
+            PlayerMovement jugador = other.GetComponent<PlayerMovement>();
 
-            if (rbJugador != null)
+            if (jugador != null)
             {
-                // 3. Calcular la dirección desde el hacha hacia el jugador
-                Vector3 direccionEmpuje = (other.transform.position - transform.position).normalized;
+                ultimoGolpe = Time.time;
 
-                // 4. Agregar elevación vertical para romper la fricción con el piso
-                direccionEmpuje.y = 0f; // Anular inclinaciones raras
-                direccionEmpuje = direccionEmpuje.normalized * fuerzaEmpuje + Vector3.up * impulsoVertical;
+                // Empuje lateral exacto en el eje horizontal (hacia donde viaja el péndulo)
+                Vector3 direccionLateral = transform.right * sentidoMovimiento;
 
-                // 5. Opcional: Reiniciar la velocidad previa para que el empuje sea consistente
-                rbJugador.linearVelocity = Vector3.zero; // En versiones previas a Unity 6 usa: rbJugador.velocity = Vector3.zero;
+                // Vector final: lateral puro + pequeña elevación
+                Vector3 fuerzaFinal = (direccionLateral * fuerzaEmpujeLateral) + (Vector3.up * fuerzaArriba);
 
-                // 6. Aplicar la fuerza instantánea
-                rbJugador.AddForce(direccionEmpuje, ForceMode.Impulse);
-
-                Debug.Log("Jugador empujado con fuerza: " + direccionEmpuje);
+                jugador.RecibirEmpuje(fuerzaFinal, 0.35f);
             }
         }
     }

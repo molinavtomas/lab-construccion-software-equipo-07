@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Salto")]
     public float jumpForce = 7f;
 
+
     [Header("Ground Check")]
     public Transform groundCheck;
     public float groundDistance = 0.2f;
@@ -34,8 +35,27 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // Variable para controlar el bloqueo tras el golpe
+    private float knockbackTimer = 0f;
+
+    public void RecibirEmpuje(Vector3 fuerzaEmpuje, float duracionBloqueo = 0.35f)
+    {
+        knockbackTimer = duracionBloqueo;
+        rb.linearVelocity = Vector3.zero; // Limpiar inercia previa
+        rb.AddForce(fuerzaEmpuje, ForceMode.Impulse);
+    }
+
     void FixedUpdate()
     {
+        if (grappling != null && grappling.IsGrappling())
+            return;
+
+        // Si está bajo el efecto del empuje, no sobreescribir la velocidad con WASD
+        if (knockbackTimer > 0)
+        {
+            knockbackTimer -= Time.fixedDeltaTime;
+            return;
+        }
         if (grappling != null && grappling.IsGrappling())
             return;
         Vector2 input = Vector2.zero;
@@ -70,7 +90,7 @@ public class PlayerMovement : MonoBehaviour
             movement *= SprintSpeed;
         }
 
-        // Aplicar movimiento sin modificar la velocidad vertical
+        // Aplicar movimiento sin modificar la velocidad    vertical
         rb.linearVelocity = new Vector3(
             movement.x,
             rb.linearVelocity.y,
