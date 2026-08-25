@@ -2819,7 +2819,7 @@ GameObject:
   - component: {fileID: 384676817}
   m_Layer: 3
   m_Name: Scenario
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8398,11 +8398,8 @@ MonoBehaviour:
   speed: 5
   SprintSpeed: 2
   jumpForce: 3.5
-  groundCheck: {fileID: 1140261982}
+  IsGrounded: 0
   groundDistance: 0.2
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 8
   grappling: {fileID: 1324531835}
 --- !u!54 &1324531837
 Rigidbody:
