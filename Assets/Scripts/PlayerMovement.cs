@@ -11,9 +11,9 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce = 7f;
 
     [Header("Ground Check")]
-    public bool IsGrounded;
+    public Transform groundCheck;
     public float groundDistance = 0.2f;
-
+    public LayerMask groundMask;
     public Grappling grappling;
 
     private Rigidbody rb;
@@ -27,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            if (IsGrounded)
+            if (IsGrounded())
             {
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
@@ -78,19 +78,15 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
-    public void OnCollisionEnter(Collision collision)
+
+    bool IsGrounded()
     {
-        if (collision.gameObject.tag == "Ground")
-        {
-            IsGrounded = true;
-        }
-    }
-    public void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.tag == "Ground")
-        {
-            IsGrounded = false;
-        }
+        return Physics.Raycast(
+            transform.position,
+         Vector3.down,
+            1.1f,
+         groundMask
+        );
     }
 
 }
