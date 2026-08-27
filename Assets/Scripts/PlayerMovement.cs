@@ -17,27 +17,45 @@ public class PlayerMovement : MonoBehaviour
     public Grappling grappling;
 
     private Rigidbody rb;
+    private Animator anim; // <-- 1. Agregamos la referencia al Animator
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        // 2. Busca automáticamente el Animator en el modelo 3D hijo
+        anim = GetComponentInChildren<Animator>();
     }
 
-      void Update()
-{
-    if (Keyboard.current.spaceKey.wasPressedThisFrame)
+    void Update()
     {
-        if (IsGrounded())
+        // Lógica de salto original
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            if (IsGrounded())
+            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
+        }
+
+        // <-- 3. ACTUALIZAR ANIMACIONES -->
+        if (anim != null)
+        {
+            // Le avisamos al Animator si el personaje no está tocando el piso
+            anim.SetBool("EstaSaltando", !IsGrounded());
+
+            // Calculamos a qué velocidad se mueve (ignorando el eje Y de caída/salto)
+            Vector3 velocidadHorizontal = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
+            // Le pasamos ese número al parámetro que creamos en la grilla
+            anim.SetFloat("Velocidad", velocidadHorizontal.magnitude);
         }
     }
-}
 
     void FixedUpdate()
     {
         if (grappling != null && grappling.IsGrappling())
             return;
+
         Vector2 input = Vector2.zero;
 
         // WASD
@@ -77,16 +95,14 @@ public class PlayerMovement : MonoBehaviour
             movement.z
         );
     }
-    
 
     bool IsGrounded()
     {
         return Physics.Raycast(
             transform.position,
-         Vector3.down,
+            Vector3.down,
             1.1f,
-         groundMask
+            groundMask
         );
     }
-  
 }
