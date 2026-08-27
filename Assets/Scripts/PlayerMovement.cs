@@ -4,11 +4,11 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movimiento")]
-    public float speed = 6f;
+    public float speed = 3f;
     public float SprintSpeed = 2f;
 
     [Header("Salto")]
-    public float jumpForce = 7f;
+    public float jumpForce = 3.5f;
 
     [Header("Ground Check")]
     public Transform groundCheck;
@@ -23,16 +23,22 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-      void Update()
-{
-    if (Keyboard.current.spaceKey.wasPressedThisFrame)
+    void Update()
     {
-        if (IsGrounded())
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            if (IsGrounded())
+            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
         }
     }
-}
+
+    public void RecibirEmpuje(Vector3 fuerzaEmpuje)
+    {
+        rb.linearVelocity = Vector3.zero; // Limpiar inercia previa
+        rb.AddForce(fuerzaEmpuje, ForceMode.Impulse);
+    }
 
     void FixedUpdate()
     {
@@ -65,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
         movement *= speed;
 
         // SHIFT = CORRER
-        if (Keyboard.current.leftShiftKey.isPressed)
+        if (Keyboard.current.leftShiftKey.isPressed && IsGrounded())
         {
             movement *= SprintSpeed;
         }
@@ -77,16 +83,13 @@ public class PlayerMovement : MonoBehaviour
             movement.z
         );
     }
-    
-
     bool IsGrounded()
     {
         return Physics.Raycast(
-            transform.position,
-         Vector3.down,
-            1.1f,
-         groundMask
+            groundCheck.position,
+            Vector3.down,
+            groundDistance,
+            groundMask
         );
     }
-  
 }
