@@ -23,16 +23,19 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-      void Update()
-{
-    if (Keyboard.current.spaceKey.wasPressedThisFrame)
+    void Update()
     {
-        if (IsGrounded())
+        // ACA AGREGAMOS EL MENSAJE PARA VER SI DETECTA EL PISO
+        Debug.Log("Tocando el piso: " + IsGrounded());
+
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            if (IsGrounded())
+            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
         }
     }
-}
 
     void FixedUpdate()
     {
@@ -77,16 +80,13 @@ public class PlayerMovement : MonoBehaviour
             movement.z
         );
     }
-    
+
 
     bool IsGrounded()
     {
-        return Physics.Raycast(
-            transform.position,
-         Vector3.down,
-            1.1f,
-         groundMask
-        );
+        // Usamos una pequeña esfera en los pies en lugar de un rayo láser.
+        // Esto mejora muchísimo la detección en los bordes de las plataformas.
+        return Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
     }
-  
+   
 }
