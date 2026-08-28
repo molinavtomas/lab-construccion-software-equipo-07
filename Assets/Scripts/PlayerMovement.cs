@@ -4,11 +4,11 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movimiento")]
-    public float speed = 6f;
+    public float speed = 3f;
     public float SprintSpeed = 2f;
 
     [Header("Salto")]
-    public float jumpForce = 7f;
+    public float jumpForce = 3.5f;
 
     [Header("Ground Check")]
     public Transform groundCheck;
