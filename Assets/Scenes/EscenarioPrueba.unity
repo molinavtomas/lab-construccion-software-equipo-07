@@ -3158,7 +3158,7 @@ GameObject:
   - component: {fileID: 424678570}
   - component: {fileID: 424678567}
   - component: {fileID: 424678566}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -7419,8 +7419,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1140261982}
-  - component: {fileID: 1140261983}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7436,33 +7435,12 @@ Transform:
   m_GameObject: {fileID: 1140261981}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.93, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1324531841}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &1140261983
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140261981}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 0.2903762, z: 1}
-  m_Center: {x: 0, y: -0.93434906, z: 0}
 --- !u!1 &1143979533
 GameObject:
   m_ObjectHideFlags: 0
@@ -8432,7 +8410,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1285556047}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8581,7 +8559,7 @@ GameObject:
   - component: {fileID: 1324531837}
   - component: {fileID: 1324531836}
   - component: {fileID: 1324531835}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Capsule
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -8624,7 +8602,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   speed: 5
   SprintSpeed: 2
-  jumpForce: 3.5
+  aceleracion: 30
+  desaceleracion: 30
+  jumpForce: 30
   groundCheck: {fileID: 1140261982}
   groundDistance: 0.2
   groundMask:
@@ -8639,7 +8619,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1324531834}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 8
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -8747,7 +8727,7 @@ Transform:
   m_GameObject: {fileID: 1324531834}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.34, y: 2.962, z: -9.12}
+  m_LocalPosition: {x: 0.34, y: 3, z: -9.12}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
