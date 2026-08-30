@@ -87,9 +87,11 @@ public class PlayerMovement : MonoBehaviour
 
     bool IsGrounded()
     {
-        // Usamos una pequeña esfera en los pies en lugar de un rayo láser.
-        // Esto mejora muchísimo la detección en los bordes de las plataformas.
-        return Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        return Physics.OverlapSphere(
+            groundCheck.position,
+            groundDistance,
+            groundMask
+        ).Length > 0;
     }
    
 }
