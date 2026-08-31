@@ -16,7 +16,10 @@ public class PlayerMovement : MonoBehaviour
     public Transform groundCheck;
     public float groundDistance = 0.2f;
     public LayerMask groundMask;
+
+    [Header("Sistemas")]
     public Grappling grappling;
+    public WallRunning wallRunning;
 
     private Rigidbody rb;
     private Animator anim; // <-- 1. Agregamos la referencia al Animator
@@ -44,6 +47,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        // Si está usando el grappling, no modificar el movimiento
         if (grappling != null && grappling.IsGrappling())
             return;
 
@@ -87,9 +91,11 @@ public class PlayerMovement : MonoBehaviour
 
     bool IsGrounded()
     {
-        // Usamos una pequeña esfera en los pies en lugar de un rayo láser.
-        // Esto mejora muchísimo la detección en los bordes de las plataformas.
-        return Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        return Physics.OverlapSphere(
+            groundCheck.position,
+            groundDistance,
+            groundMask
+        ).Length > 0;
     }
    
 }
