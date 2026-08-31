@@ -38534,6 +38534,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::PlayerMovement
   speed: 3
   SprintSpeed: 2
+  aceleracion: 40
+  desaceleracion: 60
   jumpForce: 6
   groundCheck: {fileID: 4997899203066964806}
   groundDistance: 0.2
