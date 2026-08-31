@@ -14,7 +14,10 @@ public class PlayerMovement : MonoBehaviour
     public Transform groundCheck;
     public float groundDistance = 0.2f;
     public LayerMask groundMask;
+
+    [Header("Sistemas")]
     public Grappling grappling;
+    public WallRunning wallRunning;
 
     private Rigidbody rb;
 
@@ -23,70 +26,82 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-      void Update()
-{
-    if (Keyboard.current.spaceKey.wasPressedThisFrame)
+    void Update()
     {
-        if (IsGrounded())
+        // SALTO NORMAL
+        if (Keyboard.current != null &&
+            Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            if (IsGrounded() && !IsWallRunning())
+            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
         }
     }
-}
 
     void FixedUpdate()
     {
+        // Si está usando el grappling, no modificar el movimiento
         if (grappling != null && grappling.IsGrappling())
             return;
+
+        // Si está haciendo wall run, el WallRunning controla el movimiento
+        if (IsWallRunning())
+            return;
+
         Vector2 input = Vector2.zero;
 
-        // WASD
-        if (Keyboard.current.wKey.isPressed)
-            input.y += 1;
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.wKey.isPressed)
+                input.y += 1;
 
-        if (Keyboard.current.sKey.isPressed)
-            input.y -= 1;
+            if (Keyboard.current.sKey.isPressed)
+                input.y -= 1;
 
-        if (Keyboard.current.dKey.isPressed)
-            input.x += 1;
+            if (Keyboard.current.dKey.isPressed)
+                input.x += 1;
 
-        if (Keyboard.current.aKey.isPressed)
-            input.x -= 1;
+            if (Keyboard.current.aKey.isPressed)
+                input.x -= 1;
+        }
 
-        // Evita que diagonal sea más rápido
+        // Evita velocidad extra en diagonal
         input = Vector2.ClampMagnitude(input, 1f);
 
-        // Movimiento según hacia dónde mira el jugador
         Vector3 movement =
             transform.right * input.x +
             transform.forward * input.y;
 
-        // Velocidad normal
         movement *= speed;
 
-        // SHIFT = CORRER
-        if (Keyboard.current.leftShiftKey.isPressed)
+        // SHIFT = correr
+        if (Keyboard.current != null &&
+            Keyboard.current.leftShiftKey.isPressed)
         {
             movement *= SprintSpeed;
         }
 
-        // Aplicar movimiento sin modificar la velocidad vertical
+        // No tocar la velocidad vertical
         rb.linearVelocity = new Vector3(
             movement.x,
             rb.linearVelocity.y,
             movement.z
         );
     }
-    
 
     bool IsGrounded()
     {
         return Physics.Raycast(
             transform.position,
-         Vector3.down,
+            Vector3.down,
             1.1f,
-         groundMask
+            groundMask
         );
     }
-  
+
+    bool IsWallRunning()
+    {
+        return wallRunning != null && wallRunning.wallrunning;
+    }
 }
