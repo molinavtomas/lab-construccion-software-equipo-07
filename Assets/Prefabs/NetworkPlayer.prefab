@@ -2660,6 +2660,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::CameraMovement
   mouseSensitivity: 0.2
+  nearClipPlane: 0.3
   player: {fileID: 8454067315323432492}
 --- !u!1 &8798802405114444337
 GameObject:
