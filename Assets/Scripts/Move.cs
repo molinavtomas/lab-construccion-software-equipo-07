@@ -6,6 +6,7 @@ public class Move : MonoBehaviour
 {
     [Header("Movimiento")]
     public float speed = 6f;
+    public float runSpeed = 10f;
     public float acceleration = 20f;
 
     [Header("Salto")]
@@ -25,6 +26,7 @@ public class Move : MonoBehaviour
     private Rigidbody rb;
     private Vector2 input;
     private bool jumpPressed;
+    private bool running;
 
     private void Awake()
     {
@@ -53,6 +55,9 @@ public class Move : MonoBehaviour
             input.x += 1;
 
         input = Vector2.ClampMagnitude(input, 1f);
+
+        // Correr con Shift SOLO en el suelo
+        running = Keyboard.current.leftShiftKey.isPressed && IsGrounded();
 
         // Salto
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
@@ -83,7 +88,10 @@ public class Move : MonoBehaviour
 
         moveDirection.y = 0f;
 
-        Vector3 targetVelocity = moveDirection * speed;
+        // Velocidad normal o de correr
+        float currentSpeed = running ? runSpeed : speed;
+
+        Vector3 targetVelocity = moveDirection * currentSpeed;
 
         Vector3 currentVelocity = rb.linearVelocity;
 
@@ -148,6 +156,7 @@ public class Move : MonoBehaviour
             return;
 
         Gizmos.color = Color.red;
+
         Gizmos.DrawWireSphere(
             groundCheck.position,
             groundDistance
