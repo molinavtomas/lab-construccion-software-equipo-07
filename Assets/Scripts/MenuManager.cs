@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
 
 public class MenuManager : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject canvasMain;
     [SerializeField] private GameObject canvasSettings;
     [SerializeField] private GameObject panelExit;
+    [SerializeField] private GameObject canvasMultiplayer;
     private bool sobreBoton = false;
 
     private void Start()
@@ -82,7 +84,24 @@ public class MenuManager : MonoBehaviour
 
     public void PlaySinglePlayer()
     {
-        SceneManager.LoadScene(nombreEscenaJuego);
+        NetworkManager networkManager = NetworkManager.Singleton;
+
+        if (networkManager == null)
+        {
+            Debug.LogError("No existe un NetworkManager en MenuScene.");
+            return;
+        }
+
+        if (!networkManager.StartHost())
+        {
+            Debug.LogError("No se pudo iniciar la partida individual.");
+            return;
+        }
+
+        networkManager.SceneManager.LoadScene(
+            nombreEscenaJuego,
+            LoadSceneMode.Single
+        );
     }
 
     public void Settings()
@@ -111,5 +130,18 @@ public class MenuManager : MonoBehaviour
         // Cierra la aplicación (funciona en la build final)
         Debug.Log("Saliendo del juego...");
         Application.Quit();
+    }
+
+    public void OpenMultiplayer()
+    {
+        canvasMain.SetActive(false);
+        canvasSettings.SetActive(false);
+        canvasMultiplayer.SetActive(true);
+    }
+
+    public void CloseMultiplayer()
+    {
+        canvasMultiplayer.SetActive(false);
+        canvasMain.SetActive(true);
     }
 }
