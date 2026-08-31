@@ -7838,7 +7838,7 @@ GameObject:
   - component: {fileID: 442042125}
   - component: {fileID: 442042124}
   - component: {fileID: 442042123}
-  - component: {fileID: 442042122}
+  - component: {fileID: 442042127}
   m_Layer: 0
   m_Name: MainCamera
   m_TagString: Untagged
@@ -7846,22 +7846,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &442042122
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 442042121}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99c954b33d15a6148b3be1910457750d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::CamaraTerceraPersona
-  target: {fileID: 5653454516960219724}
-  distancia: 0
-  altura: 1.5
-  sensibilidad: 15
 --- !u!114 &442042123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7980,6 +7964,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5653454516960219724}
   m_LocalEulerAnglesHint: {x: 0, y: -181.373, z: 0}
+--- !u!114 &442042127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442042121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69beeb79b3d5028499169eedf6516dda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::CameraMovement
+  mouseSensitivity: 0.2
+  player: {fileID: 5653454516960219724}
 --- !u!1001 &452183481
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38320,7 +38318,7 @@ GameObject:
   - component: {fileID: 5653454516960219728}
   - component: {fileID: 5653454516960219727}
   - component: {fileID: 5653454516960219730}
-  - component: {fileID: 5653454516960219726}
+  - component: {fileID: 5653454516960219731}
   - component: {fileID: 5653454516960219725}
   m_Layer: 0
   m_Name: Apocalyptic character (Helmet +hood)
@@ -38516,35 +38514,11 @@ MonoBehaviour:
   lr: {fileID: 0}
   whatIsGrappleable:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 4294967295
   maxGrappleDistance: 30
   grappleForce: 30
   stopDistance: 1
   grapplingCd: 1
---- !u!114 &5653454516960219726
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4989647824532375798}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 445a026b24aa17043acb0c3b3c81c093, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::PlayerMovement
-  speed: 5
-  SprintSpeed: 2
-  aceleracion: 40
-  desaceleracion: 60
-  jumpForce: 6
-  groundCheck: {fileID: 4997899203066964806}
-  groundDistance: 0.2
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 8
-  grappling: {fileID: 5653454516960219725}
-  wallRunning: {fileID: 0}
 --- !u!54 &5653454516960219727
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -38664,9 +38638,40 @@ MonoBehaviour:
   groundDistance: 0.25
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   orientation: {fileID: 5653454516960219724}
   wallrunning: 0
+--- !u!114 &5653454516960219731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4989647824532375798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d923f0710746a4e4aa2807f3b8ebdabd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::WallRun
+  whatIsWall:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  whatIsGround:
+    serializedVersion: 2
+    m_Bits: 8
+  wallRunForce: 20
+  wallJumpUpForce: 0
+  wallJumpSideForce: 5
+  wallClimbSpeed: 0
+  maxWallRunTime: 2
+  upwardsRunKey: 51
+  downwardsRunKey: 55
+  wallCheckDistance: 0.7
+  minJumpHeight: 1
+  exitWallTime: 0.2
+  useGravity: 1
+  gravityCounterForce: 5
+  orientation: {fileID: 5893529039013235495}
 --- !u!1 &5819067972819598134
 GameObject:
   m_ObjectHideFlags: 0
