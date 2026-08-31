@@ -7,17 +7,30 @@ public class PlayerNetworkSetup : NetworkBehaviour
     [SerializeField] private Camera playerCamera;
     [SerializeField] private AudioListener audioListener;
     [SerializeField] private CameraMovement cameraMovement;
-    [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private Move move;
+    [SerializeField] private WallRun wallRun;
     [SerializeField] private Grappling grappling;
 
     public override void OnNetworkSpawn()
     {
         bool esPropietario = IsOwner;
 
-        playerCamera.enabled = esPropietario;
-        audioListener.enabled = esPropietario;
-        cameraMovement.enabled = esPropietario;
-        playerMovement.enabled = esPropietario;
-        grappling.enabled = esPropietario;
+        if (playerCamera != null)
+            playerCamera.enabled = esPropietario;
+
+        if (audioListener != null)
+            audioListener.enabled = esPropietario;
+
+        if (cameraMovement != null)
+            cameraMovement.enabled = esPropietario;
+
+        if (move != null)
+            move.enabled = esPropietario;
+
+        if (wallRun != null)
+            wallRun.enabled = esPropietario;
+
+        if (grappling != null)
+            grappling.enabled = esPropietario;
     }
 }

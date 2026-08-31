@@ -386,7 +386,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 80
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &3361673467632790129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -401,6 +401,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   speed: 5
   SprintSpeed: 2
+  aceleracion: 40
+  desaceleracion: 60
   jumpForce: 3.5
   groundCheck: {fileID: 5365702168560122210}
   groundDistance: 0.2
@@ -408,6 +410,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   grappling: {fileID: 6409448333679264622}
+  wallRunning: {fileID: 0}
 --- !u!114 &6409448333679264622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -442,14 +445,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1412855064
+  GlobalObjectIdHash: 4006714939
   InScenePlacedSourceGlobalObjectIdHash: 0
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -536,5 +539,6 @@ MonoBehaviour:
   playerCamera: {fileID: 5447229559108842156}
   audioListener: {fileID: 826241322505965578}
   cameraMovement: {fileID: 7070183214210641690}
-  playerMovement: {fileID: 3361673467632790129}
+  move: {fileID: 0}
+  wallRun: {fileID: 0}
   grappling: {fileID: 6409448333679264622}
