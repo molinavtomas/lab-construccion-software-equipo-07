@@ -1668,8 +1668,9 @@ GameObject:
   - component: {fileID: 7544508909644049771}
   - component: {fileID: 7788003928555903953}
   - component: {fileID: 5031640407307823992}
+  - component: {fileID: 2846013524569081734}
   m_Layer: 0
-  m_Name: NetworkPlayer
+  m_Name: Jugador
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1833,7 +1834,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::Move
   speed: 6
   runSpeed: 10
-  acceleration: 20
+  acceleration: 55
   jumpForce: 7
   groundCheck: {fileID: 1230401407693510311}
   groundDistance: 0.25
@@ -1907,7 +1908,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3814868959
+  GlobalObjectIdHash: 377557317
   InScenePlacedSourceGlobalObjectIdHash: 0
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
@@ -2004,6 +2005,20 @@ MonoBehaviour:
   move: {fileID: 7020189118089650495}
   wallRun: {fileID: 3660889378146731393}
   grappling: {fileID: 5062520740242484260}
+--- !u!114 &2846013524569081734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6347219428683018967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c45e1f6a80d74e58b5f6495a3ddc2510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::SpeedBoostController
+  ShowTopMostFoldoutHeaderGroup: 1
+  movement: {fileID: 7020189118089650495}
 --- !u!1 &6349465550390264369
 GameObject:
   m_ObjectHideFlags: 0
