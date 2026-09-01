@@ -7,6 +7,11 @@ public class Grappling : MonoBehaviour
     public Camera cam;
     public Transform gunTip;
     public LineRenderer lr;
+    public Transform hookHead;
+
+    [Header("Visuals")]
+    [SerializeField] private float hookSurfaceOffset = 0.04f;
+    [SerializeField] private Vector3 hookHeadRotationOffset;
 
     [Header("Grappling")]
     public LayerMask whatIsGrappleable;
@@ -20,6 +25,7 @@ public class Grappling : MonoBehaviour
 
     private Rigidbody rb;
     private Vector3 grapplePoint;
+    private Vector3 grappleNormal;
     private Vector3 velocityBeforeGrapple;
     private bool grappling;
 
@@ -30,8 +36,7 @@ public class Grappling : MonoBehaviour
         // Evita que el Rigidbody haga girar el personaje
         rb.constraints |= RigidbodyConstraints.FreezeRotation;
 
-        if (lr != null)
-            lr.enabled = false;
+        HideGrappleVisuals();
     }
 
     void Update()
@@ -78,11 +83,8 @@ public class Grappling : MonoBehaviour
 
     void LateUpdate()
     {
-        if (grappling && lr != null)
-        {
-            lr.SetPosition(0, gunTip.position);
-            lr.SetPosition(1, grapplePoint);
-        }
+        if (grappling)
+            UpdateGrappleVisuals();
     }
 
     void StartGrapple()
@@ -100,18 +102,13 @@ public class Grappling : MonoBehaviour
             whatIsGrappleable))
         {
             grapplePoint = hit.point;
+            grappleNormal = hit.normal;
 
             // Guardamos la velocidad ANTES de activar el gancho
             velocityBeforeGrapple = rb.linearVelocity;
 
             grappling = true;
-
-            if (lr != null)
-            {
-                lr.enabled = true;
-                lr.SetPosition(0, gunTip.position);
-                lr.SetPosition(1, grapplePoint);
-            }
+            ShowGrappleVisuals();
         }
     }
 
@@ -123,8 +120,51 @@ public class Grappling : MonoBehaviour
         grappling = false;
         grapplingCdTimer = grapplingCd;
 
+        HideGrappleVisuals();
+    }
+
+    void OnDisable()
+    {
+        HideGrappleVisuals();
+    }
+
+    private void ShowGrappleVisuals()
+    {
+        if (lr != null)
+        {
+            lr.positionCount = 2;
+            lr.enabled = true;
+        }
+
+        if (hookHead != null)
+            hookHead.gameObject.SetActive(true);
+
+        UpdateGrappleVisuals();
+    }
+
+    private void UpdateGrappleVisuals()
+    {
+        if (lr != null && gunTip != null)
+        {
+            lr.SetPosition(0, gunTip.position);
+            lr.SetPosition(1, grapplePoint);
+        }
+
+        if (hookHead != null)
+        {
+            hookHead.position = grapplePoint + grappleNormal * hookSurfaceOffset;
+            hookHead.rotation = Quaternion.FromToRotation(Vector3.forward, -grappleNormal)
+                * Quaternion.Euler(hookHeadRotationOffset);
+        }
+    }
+
+    private void HideGrappleVisuals()
+    {
         if (lr != null)
             lr.enabled = false;
+
+        if (hookHead != null)
+            hookHead.gameObject.SetActive(false);
     }
 
     public bool IsGrappling()
