@@ -14,6 +14,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     private Rigidbody playerRigidbody;
     private NetworkTransform networkTransform;
+    private float nextRespawnRequestTime;
+
+    private const float RespawnRequestCooldown = 0.5f;
 
     private void Awake()
     {
@@ -46,8 +49,34 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     public void Respawn(Vector3 position, Quaternion rotation)
     {
-        // El NetworkTransform del jugador usa autoridad del propietario.
-        // Las copias remotas no deben intentar corregir su posicion.
+        if (!IsSpawned)
+        {
+            ApplyRespawn(position, rotation);
+            return;
+        }
+
+        // El host valida la zona de muerte. Como el NetworkTransform usa
+        // autoridad del propietario, al cliente remoto se le ordena efectuar
+        // el teletransporte sobre su propia instancia autoritativa.
+        if (!IsServer || Time.unscaledTime < nextRespawnRequestTime)
+            return;
+
+        nextRespawnRequestTime = Time.unscaledTime + RespawnRequestCooldown;
+
+        if (IsOwner)
+            ApplyRespawn(position, rotation);
+        else
+            RespawnOwnerRpc(position, rotation);
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void RespawnOwnerRpc(Vector3 position, Quaternion rotation)
+    {
+        ApplyRespawn(position, rotation);
+    }
+
+    private void ApplyRespawn(Vector3 position, Quaternion rotation)
+    {
         if (IsSpawned && !IsOwner)
             return;
 
