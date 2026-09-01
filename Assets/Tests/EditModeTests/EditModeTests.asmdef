@@ -3,6 +3,10 @@
     "optionalUnityReferences": [
         "TestAssemblies"
     ],
+    "references": [
+        "Game",
+        "Unity.Netcode.Runtime"
+    ],
     "includePlatforms": [
         "Editor"
     ]

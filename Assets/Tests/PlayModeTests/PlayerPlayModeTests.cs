@@ -1,20 +1,26 @@
 using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEditor;
+using UnityEditor.SceneManagement;
 
 public class PlayerPlayModeTests
 {
+    private const string RegressionScenePath =
+        "Assets/Scenes/GameScene.unity";
+    private const string RegressionPlayerPrefabPath =
+        "Assets/Prefabs/NetworkPlayer.prefab";
+
     // TST-S2-001
     [UnityTest]
     public IEnumerator EscenaSeEjecutaCorrectamente()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
 
         Assert.IsTrue(
             SceneManager.GetActiveScene().isLoaded,
@@ -26,9 +32,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator PlayerApareceEnSpawnValido()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -69,9 +73,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator MovimientoWASDSeRealizaEnLaDireccionEsperada()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -225,9 +227,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator JugadorSeDetieneAlSoltarLasTeclas()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -301,9 +301,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator MovimientoDiagonalNoSuperaLaVelocidadNormal()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -433,9 +431,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator JugadorSaltaYaterrizaCorrectamente()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -552,9 +548,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator JugadorNoPuedeRealizarDobleSaltoEnElAire()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -659,9 +653,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator JugadorCaePorGravedadYAterrizaCorrectamente()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -778,9 +770,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator JugadorNoAtraviesaCollidersSolidos()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -877,9 +867,7 @@ public class PlayerPlayModeTests
     {
         Assert.Pass("Prueba pendiente de automatización completa; validada manualmente.");
 
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -963,9 +951,7 @@ public class PlayerPlayModeTests
     [UnityTest]
     public IEnumerator JugadorReapareceYPuedeVolverAMoverseYASaltar()
     {
-        SceneManager.LoadScene("EscenarioPrincipal");
-
-        yield return null;
+        yield return LoadRegressionScene();
         yield return new WaitForFixedUpdate();
 
         // ==================================================
@@ -1333,6 +1319,59 @@ public class PlayerPlayModeTests
         );
 
         InputSystem.Update();
+
+        yield return null;
+    }
+
+    private static IEnumerator LoadRegressionScene()
+    {
+        EditorSceneManager.LoadSceneInPlayMode(
+            RegressionScenePath,
+            new LoadSceneParameters(LoadSceneMode.Single)
+        );
+
+        while (SceneManager.GetActiveScene().path != RegressionScenePath)
+            yield return null;
+
+        yield return null;
+
+        GameObject playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+            RegressionPlayerPrefabPath
+        );
+        Assert.IsNotNull(playerPrefab, "No se encontró el prefab NetworkPlayer.");
+
+        GameObject spawn = GameObject.Find("Respawn");
+        Assert.IsNotNull(spawn, "La escena de regresión no contiene Respawn.");
+
+        if (Keyboard.current == null)
+            InputSystem.AddDevice<Keyboard>("RegressionKeyboard");
+
+        if (Mouse.current == null)
+            InputSystem.AddDevice<Mouse>("RegressionMouse");
+
+        GameObject player = Object.Instantiate(
+            playerPrefab,
+            spawn.transform.position,
+            spawn.transform.rotation * playerPrefab.transform.rotation
+        );
+        player.name = "NetworkPlayer_RegressionFixture";
+
+        Behaviour networkRigidbody = player
+            .GetComponents<Behaviour>()
+            .FirstOrDefault(component => component.GetType().Name == "NetworkRigidbody");
+
+        if (networkRigidbody != null)
+            networkRigidbody.enabled = false;
+
+        Rigidbody body = player.GetComponent<Rigidbody>();
+        Assert.IsNotNull(body, "NetworkPlayer no contiene Rigidbody.");
+        body.isKinematic = false;
+        body.useGravity = true;
+        body.linearVelocity = Vector3.zero;
+
+        Move move = player.GetComponent<Move>();
+        Assert.IsNotNull(move, "NetworkPlayer no contiene Move.");
+        Physics.SyncTransforms();
 
         yield return null;
     }
