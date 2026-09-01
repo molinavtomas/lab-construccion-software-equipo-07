@@ -6,19 +6,32 @@ public class ZonaMuerte : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        PlayerNetworkSetup networkPlayer =
+            other.GetComponentInParent<PlayerNetworkSetup>();
+
+        if (networkPlayer != null)
         {
-            Debug.Log("Situación inválida: El jugador cayó al vacío (Modo Rigidbody).");
+            Debug.Log("Situación inválida: el jugador de red cayó al vacío.");
 
-            Rigidbody rb = other.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                // Lo movemos al inicio al instante
-                rb.position = puntoDeRespawn.position;
+            networkPlayer.Respawn(
+                puntoDeRespawn.position,
+                puntoDeRespawn.rotation
+            );
 
-                // Le matamos la inercia para que no siga cayendo como un meteorito al reaparecer
-                rb.linearVelocity = Vector3.zero;
-            }
+            return;
         }
+
+        // Compatibilidad con jugadores de escenas y pruebas sin Netcode.
+        Rigidbody rb = other.attachedRigidbody;
+
+        if (rb == null || !rb.CompareTag("Player"))
+            return;
+
+        Debug.Log("Situación inválida: el jugador cayó al vacío.");
+
+        rb.position = puntoDeRespawn.position;
+        rb.rotation = puntoDeRespawn.rotation;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
     }
 }
