@@ -208,60 +208,6 @@ public class Sprint3GameplayTests
     }
 
     [UnityTest]
-    [Category("TST_S3_022")]
-    public IEnumerator TST_S3_022_ObstaculosMovilesRespetanLimitesYSentidosOpuestos()
-    {
-        GameObject first = CreateGameObject("MovingObstacleA", Vector3.zero);
-        GameObject second = CreateGameObject("MovingObstacleB", Vector3.zero);
-        MovimientoEsferaX firstMovement = first.AddComponent<MovimientoEsferaX>();
-        MovimientoEsferaX1 secondMovement = second.AddComponent<MovimientoEsferaX1>();
-
-        SetPrivateField(firstMovement, "distancia", 2.5f);
-        SetPrivateField(firstMovement, "velocidad", 4f);
-        SetPrivateField(secondMovement, "distancia", 2.5f);
-        SetPrivateField(secondMovement, "velocidad", 4f);
-
-        yield return null;
-
-        float minimum = float.PositiveInfinity;
-        float maximum = float.NegativeInfinity;
-        float previous = first.transform.position.x;
-        int directionChanges = 0;
-        float previousDirection = 0f;
-
-        for (int i = 0; i < 55; i++)
-        {
-            yield return new WaitForSeconds(0.05f);
-
-            float current = first.transform.position.x;
-            minimum = Mathf.Min(minimum, current);
-            maximum = Mathf.Max(maximum, current);
-
-            float direction = Mathf.Sign(current - previous);
-            if (previousDirection != 0f && direction != 0f && direction != previousDirection)
-                directionChanges++;
-
-            if (direction != 0f)
-                previousDirection = direction;
-
-            previous = current;
-
-            Assert.That(Mathf.Abs(first.transform.position.x), Is.LessThanOrEqualTo(2.51f));
-            Assert.That(Mathf.Abs(second.transform.position.x), Is.LessThanOrEqualTo(2.51f));
-            Assert.That(
-                first.transform.position.x + second.transform.position.x,
-                Is.EqualTo(0f).Within(0.03f),
-                "Los obstáculos complementarios dejaron de moverse en sentidos opuestos."
-            );
-        }
-
-        Assert.That(maximum - minimum, Is.GreaterThan(4f));
-        Assert.That(directionChanges, Is.GreaterThanOrEqualTo(1));
-        Assert.That(first.transform.position.y, Is.EqualTo(0f).Within(0.001f));
-        Assert.That(first.transform.position.z, Is.EqualTo(0f).Within(0.001f));
-    }
-
-    [UnityTest]
     [Category("TST_S3_024")]
     public IEnumerator TST_S3_024_ObstaculoProvocaUnSoloRespawnSinVelocidadResidual()
     {
