@@ -6,19 +6,49 @@ public class ZonaMuerte : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        TryRespawn(other);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        // Respaldo para jugadores de red que ya estaban dentro del volumen
+        // cuando el host recibio su posicion sincronizada.
+        TryRespawn(other);
+    }
+
+    private void TryRespawn(Collider other)
+    {
+        PlayerNetworkSetup networkPlayer =
+            other.GetComponentInParent<PlayerNetworkSetup>();
+
+        if (networkPlayer != null)
         {
-            Debug.Log("Situación inválida: El jugador cayó al vacío (Modo Rigidbody).");
+            // En multijugador el host es quien valida la muerte. El componente
+            // del jugador se encarga de avisar al cliente propietario.
+            if (networkPlayer.IsSpawned && !networkPlayer.IsServer)
+                return;
 
-            Rigidbody rb = other.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                // Lo movemos al inicio al instante
-                rb.position = puntoDeRespawn.position;
+            Debug.Log("Situación inválida: el jugador de red cayó al vacío.");
 
-                // Le matamos la inercia para que no siga cayendo como un meteorito al reaparecer
-                rb.linearVelocity = Vector3.zero;
-            }
+            networkPlayer.Respawn(
+                puntoDeRespawn.position,
+                puntoDeRespawn.rotation
+            );
+
+            return;
         }
+
+        // Compatibilidad con jugadores de escenas y pruebas sin Netcode.
+        Rigidbody rb = other.attachedRigidbody;
+
+        if (rb == null || !rb.CompareTag("Player"))
+            return;
+
+        Debug.Log("Situación inválida: el jugador cayó al vacío.");
+
+        rb.position = puntoDeRespawn.position;
+        rb.rotation = puntoDeRespawn.rotation;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
     }
 }

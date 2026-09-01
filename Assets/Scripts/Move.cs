@@ -28,6 +28,7 @@ public class Move : MonoBehaviour
     private Vector2 input;
     private bool jumpPressed;
     private bool running;
+    private float speedMultiplier = 1f;
 
     private readonly List<Vector3> wallContactNormals = new List<Vector3>();
 
@@ -99,7 +100,7 @@ public class Move : MonoBehaviour
         moveDirection.y = 0f;
 
         // Velocidad normal o de correr
-        float currentSpeed = running ? runSpeed : speed;
+        float currentSpeed = (running ? runSpeed : speed) * speedMultiplier;
 
         Vector3 targetVelocity = ProjectVelocityAlongWalls(
             moveDirection * currentSpeed,
@@ -123,6 +124,16 @@ public class Move : MonoBehaviour
             velocityChange,
             ForceMode.VelocityChange
         );
+    }
+
+    public void SetSpeedMultiplier(float multiplier)
+    {
+        speedMultiplier = Mathf.Clamp(multiplier, 0.1f, 5f);
+    }
+
+    public float GetSpeedMultiplier()
+    {
+        return speedMultiplier;
     }
 
     public static Vector3 ProjectVelocityAlongWalls(
