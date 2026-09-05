@@ -28,7 +28,6 @@ public class Move : MonoBehaviour
     private Vector2 input;
     private bool jumpPressed;
     private bool running;
-    private bool keyboardInputEnabled = true;
     private float speedMultiplier = 1f;
 
     private readonly List<Vector3> wallContactNormals = new List<Vector3>();
@@ -44,64 +43,34 @@ public class Move : MonoBehaviour
 
     private void Update()
     {
-        if (!keyboardInputEnabled)
-            return;
-
         if (Keyboard.current == null)
-        {
-            ClearMovementInput();
             return;
-        }
 
         // Movimiento
-        Vector2 movementInput = Vector2.zero;
+        input = Vector2.zero;
 
         if (Keyboard.current.wKey.isPressed)
-            movementInput.y += 1;
+            input.y += 1;
 
         if (Keyboard.current.sKey.isPressed)
-            movementInput.y -= 1;
+            input.y -= 1;
 
         if (Keyboard.current.aKey.isPressed)
-            movementInput.x -= 1;
+            input.x -= 1;
 
         if (Keyboard.current.dKey.isPressed)
-            movementInput.x += 1;
+            input.x += 1;
+
+        input = Vector2.ClampMagnitude(input, 1f);
 
         // Correr con Shift SOLO en el suelo
-        SetMovementInput(
-            movementInput,
-            Keyboard.current.leftShiftKey.isPressed
-        );
+        running = Keyboard.current.leftShiftKey.isPressed && IsGrounded();
 
         // Salto
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
-            RequestJump();
-    }
-
-    public void SetKeyboardInputEnabled(bool enabled)
-    {
-        keyboardInputEnabled = enabled;
-
-        if (!enabled)
-            ClearMovementInput();
-    }
-
-    public void SetMovementInput(Vector2 movementInput, bool wantsToRun = false)
-    {
-        input = Vector2.ClampMagnitude(movementInput, 1f);
-        running = wantsToRun && IsGrounded();
-    }
-
-    public void ClearMovementInput()
-    {
-        input = Vector2.zero;
-        running = false;
-    }
-
-    public void RequestJump()
-    {
-        jumpPressed = true;
+        {
+            jumpPressed = true;
+        }
     }
 
     private void FixedUpdate()
