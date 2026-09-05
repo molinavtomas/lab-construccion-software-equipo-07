@@ -1954,7 +1954,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::WallRun
   whatIsWall:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 128
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
@@ -1991,7 +1991,7 @@ MonoBehaviour:
   hookHeadRotationOffset: {x: 0, y: 0, z: 0}
   whatIsGrappleable:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 256
   maxGrappleDistance: 30
   grappleForce: 30
   stopDistance: 1
