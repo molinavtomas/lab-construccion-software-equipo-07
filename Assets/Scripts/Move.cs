@@ -28,6 +28,7 @@ public class Move : MonoBehaviour
     private Vector2 input;
     private bool jumpPressed;
     private bool running;
+    private bool keyboardInputEnabled = true;
     private float speedMultiplier = 1f;
 
     private readonly List<Vector3> wallContactNormals = new List<Vector3>();
@@ -43,34 +44,64 @@ public class Move : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current == null)
+        if (!keyboardInputEnabled)
             return;
 
+        if (Keyboard.current == null)
+        {
+            ClearMovementInput();
+            return;
+        }
+
         // Movimiento
-        input = Vector2.zero;
+        Vector2 movementInput = Vector2.zero;
 
         if (Keyboard.current.wKey.isPressed)
-            input.y += 1;
+            movementInput.y += 1;
 
         if (Keyboard.current.sKey.isPressed)
-            input.y -= 1;
+            movementInput.y -= 1;
 
         if (Keyboard.current.aKey.isPressed)
-            input.x -= 1;
+            movementInput.x -= 1;
 
         if (Keyboard.current.dKey.isPressed)
-            input.x += 1;
-
-        input = Vector2.ClampMagnitude(input, 1f);
+            movementInput.x += 1;
 
         // Correr con Shift SOLO en el suelo
-        running = Keyboard.current.leftShiftKey.isPressed && IsGrounded();
+        SetMovementInput(
+            movementInput,
+            Keyboard.current.leftShiftKey.isPressed
+        );
 
         // Salto
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
-            jumpPressed = true;
-        }
+            RequestJump();
+    }
+
+    public void SetKeyboardInputEnabled(bool enabled)
+    {
+        keyboardInputEnabled = enabled;
+
+        if (!enabled)
+            ClearMovementInput();
+    }
+
+    public void SetMovementInput(Vector2 movementInput, bool wantsToRun = false)
+    {
+        input = Vector2.ClampMagnitude(movementInput, 1f);
+        running = wantsToRun && IsGrounded();
+    }
+
+    public void ClearMovementInput()
+    {
+        input = Vector2.zero;
+        running = false;
+    }
+
+    public void RequestJump()
+    {
+        jumpPressed = true;
     }
 
     private void FixedUpdate()

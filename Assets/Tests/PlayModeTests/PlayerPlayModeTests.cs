@@ -14,7 +14,7 @@ public class PlayerPlayModeTests
     private const string RegressionScenePath =
         "Assets/Scenes/GameScene.unity";
     private const string RegressionPlayerPrefabPath =
-        "Assets/Prefabs/NetworkPlayer.prefab";
+        "Assets/Personajes-objetos/Jugador.prefab";
 
     // TST-S2-001
     [UnityTest]
@@ -90,12 +90,12 @@ public class PlayerPlayModeTests
             "El jugador no tiene Rigidbody."
         );
 
-        // Guardamos la rotación inicial porque el movimiento
-        // depende de transform.forward y transform.right.
-        Vector3 forward = player.transform.forward;
-        Vector3 right = player.transform.right;
+        Move move = player.GetComponent<Move>();
+        Assert.IsNotNull(move, "El jugador no tiene Move.");
+        Assert.IsNotNull(move.orientation, "Move no tiene una orientación configurada.");
 
-        Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+        Vector3 forward = move.orientation.forward;
+        Vector3 right = move.orientation.right;
 
         // --------------------------------------------------
         // W - Movimiento hacia adelante
@@ -103,22 +103,12 @@ public class PlayerPlayModeTests
 
         Vector3 posicionInicial = player.transform.position;
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.W)
-        );
-
-        InputSystem.Update();
+        move.SetMovementInput(Vector2.up);
 
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
+        move.ClearMovementInput();
 
         Vector3 desplazamiento = player.transform.position - posicionInicial;
 
@@ -128,28 +118,20 @@ public class PlayerPlayModeTests
             "El jugador no se desplazo hacia adelante al presionar W."
         );
 
+        yield return WaitForHorizontalStop(rb);
+
         // --------------------------------------------------
         // S - Movimiento hacia atras
         // --------------------------------------------------
 
         posicionInicial = player.transform.position;
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.S)
-        );
-
-        InputSystem.Update();
+        move.SetMovementInput(Vector2.down);
 
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
+        move.ClearMovementInput();
 
         desplazamiento = player.transform.position - posicionInicial;
 
@@ -159,28 +141,20 @@ public class PlayerPlayModeTests
             "El jugador no se desplazo hacia atras al presionar S."
         );
 
+        yield return WaitForHorizontalStop(rb);
+
         // --------------------------------------------------
         // A - Movimiento hacia la izquierda
         // --------------------------------------------------
 
         posicionInicial = player.transform.position;
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.A)
-        );
-
-        InputSystem.Update();
+        move.SetMovementInput(Vector2.left);
 
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
+        move.ClearMovementInput();
 
         desplazamiento = player.transform.position - posicionInicial;
 
@@ -190,28 +164,20 @@ public class PlayerPlayModeTests
             "El jugador no se desplazo hacia la izquierda al presionar A."
         );
 
+        yield return WaitForHorizontalStop(rb);
+
         // --------------------------------------------------
         // D - Movimiento hacia la derecha
         // --------------------------------------------------
 
         posicionInicial = player.transform.position;
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.D)
-        );
-
-        InputSystem.Update();
+        move.SetMovementInput(Vector2.right);
 
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
+        move.ClearMovementInput();
 
         desplazamiento = player.transform.position - posicionInicial;
 
@@ -221,7 +187,6 @@ public class PlayerPlayModeTests
             "El jugador no se desplazo hacia la derecha al presionar D."
         );
 
-        InputSystem.RemoveDevice(keyboard);
     }
 
     [UnityTest]
@@ -244,15 +209,11 @@ public class PlayerPlayModeTests
             "El jugador no tiene Rigidbody."
         );
 
-        Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+        Move move = player.GetComponent<Move>();
+        Assert.IsNotNull(move, "El jugador no tiene Move.");
 
         // Mantener W presionada para generar movimiento.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.W)
-        );
-
-        InputSystem.Update();
+        move.SetMovementInput(Vector2.up);
 
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
@@ -269,15 +230,8 @@ public class PlayerPlayModeTests
             "El jugador no genero movimiento al mantener W."
         );
 
-        // Soltar todas las teclas.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
-
-        yield return new WaitForFixedUpdate();
+        move.ClearMovementInput();
+        yield return WaitForHorizontalStop(rb);
 
         Vector3 velocidadDespuesDeSoltar = rb.linearVelocity;
 
@@ -293,7 +247,6 @@ public class PlayerPlayModeTests
             "El jugador continua desplazandose despues de soltar las teclas."
         );
 
-        InputSystem.RemoveDevice(keyboard);
     }
 
     // TST-S2-006
@@ -318,18 +271,14 @@ public class PlayerPlayModeTests
             "El jugador no tiene Rigidbody."
         );
 
-        Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+        Move move = player.GetComponent<Move>();
+        Assert.IsNotNull(move, "El jugador no tiene Move.");
 
         // --------------------------------------------------
         // Movimiento normal con W
         // --------------------------------------------------
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.W)
-        );
-
-        InputSystem.Update();
+        move.SetMovementInput(Vector2.up);
 
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
@@ -345,26 +294,14 @@ public class PlayerPlayModeTests
             "El jugador no se desplazo con W."
         );
 
-        // Soltar W
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
-
-        yield return new WaitForFixedUpdate();
+        move.ClearMovementInput();
+        yield return WaitForHorizontalStop(rb);
 
         // --------------------------------------------------
         // Movimiento diagonal W + D
         // --------------------------------------------------
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.W, Key.D)
-        );
-
-        InputSystem.Update();
+        move.SetMovementInput(new Vector2(1f, 1f));
 
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
@@ -380,26 +317,14 @@ public class PlayerPlayModeTests
             "W+D produce una velocidad superior a la velocidad normal."
         );
 
-        // Soltar teclas
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
-
-        yield return new WaitForFixedUpdate();
+        move.ClearMovementInput();
+        yield return WaitForHorizontalStop(rb);
 
         // --------------------------------------------------
         // Movimiento diagonal W + A
         // --------------------------------------------------
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.W, Key.A)
-        );
-
-        InputSystem.Update();
+        move.SetMovementInput(new Vector2(-1f, 1f));
 
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
@@ -415,15 +340,7 @@ public class PlayerPlayModeTests
             "W+A produce una velocidad superior a la velocidad normal."
         );
 
-        // Liberar teclado
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
-
-        InputSystem.RemoveDevice(keyboard);
+        move.ClearMovementInput();
     }
 
     // TST-S2-008
@@ -463,26 +380,26 @@ public class PlayerPlayModeTests
             "El jugador no comienza apoyado sobre una superficie válida."
         );
 
+        Move move = player.GetComponent<Move>();
+        Assert.IsNotNull(move, "El jugador no tiene Move.");
+
+        float tiempoSuelo = 0f;
+
+        while (!move.IsGrounded() && tiempoSuelo < 1f)
+        {
+            yield return new WaitForFixedUpdate();
+            tiempoSuelo += Time.fixedDeltaTime;
+        }
+
+        Assert.IsTrue(
+            move.IsGrounded(),
+            "Move no detectó al jugador apoyado antes del salto."
+        );
+
         Vector3 posicionInicial = player.transform.position;
 
-        Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
-
-        // Presionar Space.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.Space)
-        );
-
-        // Dejamos que Unity procese el input.
-        yield return null;
-
-        // Liberar Space.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        yield return null;
+        move.RequestJump();
+        yield return new WaitForFixedUpdate();
 
         // Esperar algunos FixedUpdate y comprobar si ascendió.
         bool ascendio = false;
@@ -539,7 +456,6 @@ public class PlayerPlayModeTests
             "El jugador no aterrizo correctamente sobre el suelo."
         );
 
-        InputSystem.RemoveDevice(keyboard);
     }
 
 
@@ -580,25 +496,27 @@ public class PlayerPlayModeTests
             "El jugador no comienza apoyado sobre una superficie válida."
         );
 
-        Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+        Move move = player.GetComponent<Move>();
+        Assert.IsNotNull(move, "El jugador no tiene Move.");
+
+        float tiempoSuelo = 0f;
+
+        while (!move.IsGrounded() && tiempoSuelo < 1f)
+        {
+            yield return new WaitForFixedUpdate();
+            tiempoSuelo += Time.fixedDeltaTime;
+        }
+
+        Assert.IsTrue(
+            move.IsGrounded(),
+            "Move no detectó al jugador apoyado antes del primer salto."
+        );
 
         // --------------------------------------------------
         // Primer salto
         // --------------------------------------------------
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.Space)
-        );
-
-        yield return null;
-
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        yield return null;
+        move.RequestJump();
 
         // Esperar dos FixedUpdate para asegurarnos de que
         // el primer salto fue aplicado.
@@ -619,19 +537,7 @@ public class PlayerPlayModeTests
         // Intento de segundo salto en el aire
         // --------------------------------------------------
 
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.Space)
-        );
-
-        yield return null;
-
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        yield return null;
+        move.RequestJump();
 
         yield return new WaitForFixedUpdate();
 
@@ -645,7 +551,6 @@ public class PlayerPlayModeTests
             "Se aplicó un segundo salto mientras el jugador estaba en el aire."
         );
 
-        InputSystem.RemoveDevice(keyboard);
     }
 
     // TST-S2-010
@@ -972,6 +877,9 @@ public class PlayerPlayModeTests
             "El jugador no tiene Rigidbody."
         );
 
+        Move move = player.GetComponent<Move>();
+        Assert.IsNotNull(move, "El jugador no tiene Move.");
+
         // ==================================================
         // 2. Obtener ZonaMuerte
         // ==================================================
@@ -991,17 +899,6 @@ public class PlayerPlayModeTests
 
         Vector3 posicionRespawn =
             zonaMuerte.puntoDeRespawn.position;
-
-        // ==================================================
-        // 3. Obtener teclado
-        // ==================================================
-
-        Keyboard keyboard = Keyboard.current;
-
-        Assert.IsNotNull(
-            keyboard,
-            "No se encontró un teclado disponible en el Input System."
-        );
 
         // ==================================================
         // 4. Provocar caída
@@ -1108,30 +1005,14 @@ public class PlayerPlayModeTests
         Vector3 posicionAntesMovimiento =
             player.transform.position;
 
-        // Presionar W.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.W)
-        );
-
-        InputSystem.Update();
-
-        yield return null;
+        move.SetMovementInput(Vector2.up);
 
         // Mantener W durante varios ciclos de física.
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
 
-        // Liberar W.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
-
-        yield return null;
+        move.ClearMovementInput();
 
         float desplazamiento =
             Vector3.Distance(
@@ -1206,6 +1087,19 @@ public class PlayerPlayModeTests
             "El jugador no está sobre una superficie válida antes del salto."
         );
 
+        tiempo = 0f;
+
+        while (!move.IsGrounded() && tiempo < 1f)
+        {
+            yield return new WaitForFixedUpdate();
+            tiempo += Time.fixedDeltaTime;
+        }
+
+        Assert.IsTrue(
+            move.IsGrounded(),
+            "Move no detectó al jugador apoyado antes del salto posterior al respawn."
+        );
+
         // Asegurar que no haya velocidad vertical residual.
         rb.linearVelocity = new Vector3(
             rb.linearVelocity.x,
@@ -1238,32 +1132,7 @@ public class PlayerPlayModeTests
             $"Grounded esperado: TRUE"
         );
 
-        // Presionar SPACE.
-        // KeyboardState permite modificar correctamente
-        // el estado de una tecla del teclado.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState(Key.Space)
-        );
-
-        // NO llamar InputSystem.Update() acá.
-        // Dejamos que Unity procese el input en su ciclo normal.
-        yield return null;
-
-        // Comprobar el estado del teclado.
-        Debug.Log(
-            $"INPUT SPACE - " +
-            $"Pressed: {keyboard.spaceKey.isPressed} | " +
-            $"WasPressedThisFrame: {keyboard.spaceKey.wasPressedThisFrame}"
-        );
-
-        // Liberar SPACE.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        yield return null;
+        move.RequestJump();
 
         // Dar tiempo a que el Rigidbody procese el impulso.
         yield return new WaitForFixedUpdate();
@@ -1304,23 +1173,25 @@ public class PlayerPlayModeTests
             "El jugador reapareció correctamente pero no puede volver a saltar."
         );
 
-        // Asegurar que Space quede liberado.
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
+    }
+
+    private static IEnumerator WaitForHorizontalStop(Rigidbody body)
+    {
+        const float stopThreshold = 0.01f;
+        float elapsed = 0f;
+
+        while (new Vector2(body.linearVelocity.x, body.linearVelocity.z).magnitude >
+               stopThreshold && elapsed < 1f)
+        {
+            yield return new WaitForFixedUpdate();
+            elapsed += Time.fixedDeltaTime;
+        }
+
+        Assert.That(
+            new Vector2(body.linearVelocity.x, body.linearVelocity.z).magnitude,
+            Is.LessThanOrEqualTo(stopThreshold),
+            "El jugador no se detuvo antes de probar la siguiente dirección."
         );
-        // ==================================================
-        // 14. Limpiar input
-        // ==================================================
-
-        InputSystem.QueueStateEvent(
-            keyboard,
-            new KeyboardState()
-        );
-
-        InputSystem.Update();
-
-        yield return null;
     }
 
     private static IEnumerator LoadRegressionScene()
@@ -1338,7 +1209,7 @@ public class PlayerPlayModeTests
         GameObject playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
             RegressionPlayerPrefabPath
         );
-        Assert.IsNotNull(playerPrefab, "No se encontró el prefab NetworkPlayer.");
+        Assert.IsNotNull(playerPrefab, "No se encontró el prefab Jugador.");
 
         GameObject spawn = GameObject.Find("Respawn");
         Assert.IsNotNull(spawn, "La escena de regresión no contiene Respawn.");
@@ -1371,6 +1242,7 @@ public class PlayerPlayModeTests
 
         Move move = player.GetComponent<Move>();
         Assert.IsNotNull(move, "NetworkPlayer no contiene Move.");
+        move.SetKeyboardInputEnabled(false);
         Physics.SyncTransforms();
 
         yield return null;
