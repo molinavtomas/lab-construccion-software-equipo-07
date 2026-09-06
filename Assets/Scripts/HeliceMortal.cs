@@ -1,19 +1,9 @@
 using UnityEngine;
 
-public class ObstaculoMuerte : MonoBehaviour
+public class HeliceMortal : MonoBehaviour
 {
-    [Header("Movimiento")]
-    public float velocidadRotacion = 100f; // Ajustá este número para que gire más rápido o más lento
-
     [Header("Respawn")]
     public Transform puntoDeRespawn; // Acá vamos a conectar tu objeto "Respawn"
-
-    void Update()
-    {
-        // Esto hace que la hélice gire constantemente. 
-        // Si gira para un lado que no querés, cambiale el eje (ej: transform.Rotate(0, velocidadRotacion * Time.deltaTime, 0); )
-        transform.Rotate(0, 0, velocidadRotacion * Time.deltaTime);
-    }
 
     private void OnCollisionEnter(Collision collision)
     {
