@@ -15,7 +15,7 @@ public class Grappling : MonoBehaviour
 
     [Header("Grappling")]
     public LayerMask whatIsGrappleable;
-    public float maxGrappleDistance = 30f;
+    public float maxGrappleDistance = 20f;
     public float grappleForce = 20f;
     public float stopDistance = 1f;
 
