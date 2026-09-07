@@ -1992,8 +1992,8 @@ MonoBehaviour:
   whatIsGrappleable:
     serializedVersion: 2
     m_Bits: 256
-  maxGrappleDistance: 30
-  grappleForce: 30
+  maxGrappleDistance: 20
+  grappleForce: 20
   stopDistance: 1
   grapplingCd: 1
 --- !u!114 &370442685910085628

@@ -3,7 +3,7 @@ using UnityEngine;
 public class RotacionVentilador : MonoBehaviour
 {
     [Header("Movimiento")]
-    public float velocidadRotacion = 140f; // Ajustá este número para que gire más rápido o más lento
+    public float velocidadRotacion = 160f; // Ajustá este número para que gire más rápido o más lento
 
     void Update()
     {
