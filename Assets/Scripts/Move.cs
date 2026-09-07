@@ -63,9 +63,25 @@ public class Move : MonoBehaviour
 
         input = Vector2.ClampMagnitude(input, 1f);
 
-        // Correr con Shift SOLO en el suelo
-        running = Keyboard.current.leftShiftKey.isPressed && IsGrounded();
+        // 1. Leemos el estado de la tecla y del suelo
+        bool isShiftPressed = Keyboard.current.leftShiftKey.isPressed;
+        bool enSuelo = IsGrounded();
 
+        // 2. Evaluamos la lógica de carrera
+        if (enSuelo)
+        {
+            // Si estamos en el piso, correr depende 100% de si apretamos Shift
+            running = isShiftPressed;
+        }
+        else
+        {
+            // Si estamos en el aire, NO podemos empezar a correr.
+            // PERO si ya veníamos corriendo (running == true) y soltamos la tecla, se apaga.
+            if (!isShiftPressed)
+            {
+                running = false;
+            }
+        }
         // Salto
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
