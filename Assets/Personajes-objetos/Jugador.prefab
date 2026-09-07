@@ -1765,6 +1765,7 @@ GameObject:
   - component: {fileID: 7788003928555903953}
   - component: {fileID: 5031640407307823992}
   - component: {fileID: 2846013524569081734}
+  - component: {fileID: 5069080372004318968}
   m_Layer: 0
   m_Name: Jugador
   m_TagString: Player
@@ -2119,6 +2120,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::SpeedBoostController
   ShowTopMostFoldoutHeaderGroup: 1
   movement: {fileID: 7020189118089650495}
+--- !u!114 &5069080372004318968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6347219428683018967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704623307e9b5634bb2a1fcb33b5d6d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::PlayerRespawn
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &6349465550390264369
 GameObject:
   m_ObjectHideFlags: 0

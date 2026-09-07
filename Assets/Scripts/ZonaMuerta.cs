@@ -1,7 +1,9 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class ZonaMuerte : MonoBehaviour
 {
+    // Restablecemos esta variable para que los tests de PlayMode no den error de compilación
     public Transform puntoDeRespawn;
 
     private void OnTriggerEnter(Collider other)
@@ -11,30 +13,22 @@ public class ZonaMuerte : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        // Respaldo para jugadores de red que ya estaban dentro del volumen
-        // cuando el host recibio su posicion sincronizada.
         TryRespawn(other);
     }
 
     private void TryRespawn(Collider other)
     {
-        PlayerNetworkSetup networkPlayer =
-            other.GetComponentInParent<PlayerNetworkSetup>();
+        PlayerNetworkSetup networkPlayer = other.GetComponentInParent<PlayerNetworkSetup>();
 
         if (networkPlayer != null)
         {
-            // En multijugador el host es quien valida la muerte. El componente
-            // del jugador se encarga de avisar al cliente propietario.
             if (networkPlayer.IsSpawned && !networkPlayer.IsServer)
                 return;
 
-            Debug.Log("Situación inválida: el jugador de red cayó al vacío.");
+            Debug.Log("Situación inválida: el jugador de red cayó al vacío. Respawneando en su checkpoint.");
 
-            networkPlayer.Respawn(
-                puntoDeRespawn.position,
-                puntoDeRespawn.rotation
-            );
-
+            // El jugador se encarga de ir a su último checkpoint
+            networkPlayer.RespawnAlUltimoCheckpoint();
             return;
         }
 
@@ -46,8 +40,12 @@ public class ZonaMuerte : MonoBehaviour
 
         Debug.Log("Situación inválida: el jugador cayó al vacío.");
 
-        rb.position = puntoDeRespawn.position;
-        rb.rotation = puntoDeRespawn.rotation;
+        if (puntoDeRespawn != null)
+        {
+            rb.position = puntoDeRespawn.position;
+            rb.rotation = puntoDeRespawn.rotation;
+        }
+
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
     }
