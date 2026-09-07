@@ -1,39 +1,74 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+// 1. Cambiamos MonoBehaviour por NetworkBehaviour
+public class GameManager : NetworkBehaviour
 {
     [Header("Configuración del Nivel")]
-    public float tiempoMaximo = 60f; // Tiempo límite en segundos para perder
+    public float tiempoMaximo = 120f;
 
-    [Header("Estado del Juego")]
-    public bool juegoTerminado = false;
-    private float tiempoActual = 0f;
+    [Header("Estado del Juego (Sincronizado)")]
+    // 2. Usamos NetworkVariable para que el tiempo sea igual en todas las pantallas
+    public NetworkVariable<float> tiempoActual = new NetworkVariable<float>(0f);
+    public NetworkVariable<bool> carreraActiva = new NetworkVariable<bool>(false);
 
+    // Flag interno del servidor (para cumplir el criterio de no repetir eventos)
+    private bool juegoTerminado = false;
     void Update()
     {
-        // Si el juego ya terminó, no seguimos contando el tiempo
-        if (juegoTerminado) return;
+        // Si estamos en red y NO somos servidor, salimos
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsClient && !IsServer) return;
 
-        tiempoActual += Time.deltaTime;
+        // Si ya terminó o no arrancó, salimos
+        if (juegoTerminado || !carreraActiva.Value) return;
 
-        // Condición de derrota: se acabó el tiempo
-        if (tiempoActual >= tiempoMaximo)
+        // Si llega acá, o es SinglePlayer puro (no hay NetworkManager) o es el Host
+        // (Usamos un float normal o la network variable según prefieras)
+        tiempoActual.Value += Time.deltaTime;
+
+        if (tiempoActual.Value >= tiempoMaximo)
         {
-            PerderJuego();
+            PerderJuegoPorTiempo();
         }
     }
 
-    public void GanarJuego()
+    // Método para arrancar el cronómetro cuando den la señal de largada
+    public void IniciarCarrera()
     {
-        juegoTerminado = true;
-        Debug.Log($"¡Llegaste a la meta! Tiempo total: {tiempoActual:F2} segundos.");
-        // Más adelante acá podés agregar la interfaz de victoria
+        if (!IsServer) return;
+        carreraActiva.Value = true;
+        juegoTerminado = false;
     }
 
-    public void PerderJuego()
+    
+    public void RegistrarLlegada(ulong idGanador)
+    {
+        if (!IsServer || juegoTerminado || !carreraActiva.Value) return;
+
+        juegoTerminado = true;
+        carreraActiva.Value = false; // Frena el cronómetro para todos
+
+        Debug.Log($"¡El jugador {idGanador} cruzó la meta en {tiempoActual.Value:F2} segundos!");
+
+        
+    }
+
+    // Tu método PerderJuego
+    public void PerderJuegoPorTiempo()
     {
         juegoTerminado = true;
-        Debug.Log("¡Derrota! Se agotó el tiempo límite.");
-        // Más adelante acá podés reiniciar la escena
+        carreraActiva.Value = false;
+
+        Debug.Log("¡Derrota global! Se agotó el tiempo límite para ambos.");
+
+        
+    }
+    public override void OnNetworkSpawn()
+    {
+        // Apenas el Servidor carga el nivel, forzamos el inicio de la carrera
+        if (IsServer)
+        {
+            IniciarCarrera();
+        }
     }
 }

@@ -1,16 +1,26 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class Llegada : MonoBehaviour
 {
     [Header("Conexión con el sistema")]
-    public GameManager gameManager; // Arrastrar acá el objeto que tenga el GameManager
+    public GameManager gameManager;
 
     private void OnTriggerEnter(Collider other)
     {
-        // Si el jugador cruza la meta y el juego no había terminado...
-        if (other.CompareTag("Player") && !gameManager.juegoTerminado)
+        // 1. Clave de seguridad: Solo dejamos que el Servidor procese la meta
+        if (!NetworkManager.Singleton.IsServer) return;
+
+        if (other.CompareTag("Player"))
         {
-            gameManager.GanarJuego();
+            // 2. Buscamos la identidad de red del jugador que acaba de chocar
+            NetworkObject playerNetworkObject = other.GetComponent<NetworkObject>();
+
+            if (playerNetworkObject != null)
+            {
+                // 3. Le pasamos el ID exacto (OwnerClientId) de ese jugador al Manager
+                gameManager.RegistrarLlegada(playerNetworkObject.OwnerClientId);
+            }
         }
     }
 }
