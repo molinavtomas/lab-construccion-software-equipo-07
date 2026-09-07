@@ -24,6 +24,7 @@ public class MenuManager : MonoBehaviour
     [Header("Canvas")]
     [SerializeField] private GameObject canvasMain;
     [SerializeField] private GameObject canvasSettings;
+    [SerializeField] private GameObject canvasRules;
     [SerializeField] private GameObject panelExit;
     [SerializeField] private GameObject canvasMultiplayer;
     private bool sobreBoton = false;
@@ -42,9 +43,6 @@ public class MenuManager : MonoBehaviour
         // Comprobar si el puntero está sobre algún elemento de la UI
         if (EventSystem.current.IsPointerOverGameObject())
         {
-            // Opcional: Validar si el objeto específico sobre el que está es interactuable (Button o Selectable)
-            GameObject objetoHover = EventSystem.current.currentSelectedGameObject;
-
             // Si quieres que cambie sobre CUALQUIER elemento UI o botón:
             if (!sobreBoton)
             {
@@ -108,6 +106,18 @@ public class MenuManager : MonoBehaviour
     {
         canvasMain.SetActive(false);
         canvasSettings.SetActive(true);
+    }
+
+    public void OpenRules()
+    {
+        canvasMain.SetActive(false);
+        canvasRules.SetActive(true);
+    }
+
+    public void CloseRules()
+    {
+        canvasMain.SetActive(true);
+        canvasRules.SetActive(false);
     }
 
     public void ReturnMenu()
