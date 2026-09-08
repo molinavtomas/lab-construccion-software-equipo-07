@@ -12,6 +12,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
     [SerializeField] private WallRun wallRun;
     [SerializeField] private Grappling grappling;
 
+    [Header("Checkpoint")]
+    private Vector3 ultimoCheckpointPos;
+    private Quaternion ultimoCheckpointRot;
+
     private Rigidbody playerRigidbody;
     private NetworkTransform networkTransform;
     private float nextRespawnRequestTime;
@@ -45,6 +49,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         if (grappling != null)
             grappling.enabled = esPropietario;
+
+        // Guarda la posición inicial como el primer punto seguro
+        ultimoCheckpointPos = transform.position;
+        ultimoCheckpointRot = transform.rotation;
     }
 
     public void Respawn(Vector3 position, Quaternion rotation)
@@ -102,5 +110,20 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 transform.localScale
             );
         }
+    }
+
+    // --- NUEVOS MÉTODOS PARA CHECKPOINTS ---
+
+    public void GuardarCheckpoint(Vector3 nuevaPos, Quaternion nuevaRot)
+    {
+        ultimoCheckpointPos = nuevaPos;
+        ultimoCheckpointRot = nuevaRot;
+        Debug.Log("¡Checkpoint guardado exitosamente!");
+    }
+
+    public void RespawnAlUltimoCheckpoint()
+    {
+        // Reutiliza tu lógica robusta de respawn en red
+        Respawn(ultimoCheckpointPos, ultimoCheckpointRot);
     }
 }
