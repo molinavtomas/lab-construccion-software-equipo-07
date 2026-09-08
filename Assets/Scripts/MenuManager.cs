@@ -90,8 +90,20 @@ public class MenuManager : MonoBehaviour
             return;
         }
 
+        LobbyPlayerSpawner playerSpawner =
+            networkManager.GetComponent<LobbyPlayerSpawner>();
+
+        if (playerSpawner == null)
+        {
+            Debug.LogError("No existe un LobbyPlayerSpawner en MenuScene.");
+            return;
+        }
+
+        playerSpawner.ConfigureRequiredPlayerCount(1);
+
         if (!networkManager.StartHost())
         {
+            playerSpawner.ConfigureRequiredPlayerCount(2);
             Debug.LogError("No se pudo iniciar la partida individual.");
             return;
         }

@@ -90,7 +90,17 @@ public class Move : MonoBehaviour
     public void SetMovementInput(Vector2 movementInput, bool wantsToRun = false)
     {
         input = Vector2.ClampMagnitude(movementInput, 1f);
-        running = wantsToRun && IsGrounded();
+
+        if (IsGrounded())
+        {
+            running = wantsToRun;
+            return;
+        }
+
+        // Mantener la carrera si el salto comenzó corriendo, pero no permitir
+        // que Shift active la carrera por primera vez mientras está en el aire.
+        if (!wantsToRun)
+            running = false;
     }
 
     public void ClearMovementInput()
@@ -258,11 +268,11 @@ public class Move : MonoBehaviour
     {
         if (!IsGrounded())
         {
-            Debug.Log("NO ESTOY EN EL SUELO");
+            // Debug.Log("NO ESTOY EN EL SUELO");
             return;
         }
 
-        Debug.Log("SALTANDO");
+        // Debug.Log("SALTANDO");
 
         rb.linearVelocity = new Vector3(
             rb.linearVelocity.x,

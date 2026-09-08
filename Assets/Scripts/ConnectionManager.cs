@@ -26,7 +26,7 @@ public class ConnectionManager : MonoBehaviour
 
     [Header("Game")]
     [SerializeField] private string gameSceneName = "GameScene";
-    [SerializeField] private int maxClients = 4;
+    [SerializeField, Min(2)] private int requiredPlayerCount = 2;
 
     private Task initializationTask;
     private string currentJoinCode;
@@ -91,6 +91,18 @@ public class ConnectionManager : MonoBehaviour
             if (networkManager == null)
                 throw new InvalidOperationException("NetworkManager no encontrado.");
 
+            LobbyPlayerSpawner playerSpawner =
+                networkManager.GetComponent<LobbyPlayerSpawner>();
+
+            if (playerSpawner == null)
+            {
+                throw new InvalidOperationException(
+                    "LobbyPlayerSpawner no encontrado."
+                );
+            }
+
+            playerSpawner.ConfigureRequiredPlayerCount(requiredPlayerCount);
+
             UnityTransport transport =
                 networkManager.GetComponent<UnityTransport>();
 
@@ -98,11 +110,14 @@ public class ConnectionManager : MonoBehaviour
                 throw new InvalidOperationException("Unity Transport no encontrado.");
 
             Debug.Log(
-                $"[Relay][HOST] Creando allocation para {maxClients} clientes adicionales."
+                $"[Relay][HOST] Creando allocation para " +
+                $"{requiredPlayerCount - 1} cliente(s) adicional(es)."
             );
 
             Allocation allocation =
-                await RelayService.Instance.CreateAllocationAsync(maxClients);
+                await RelayService.Instance.CreateAllocationAsync(
+                    requiredPlayerCount - 1
+                );
 
             currentJoinCode =
                 await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
@@ -240,6 +255,17 @@ public class ConnectionManager : MonoBehaviour
 
         int playerCount = networkManager.ConnectedClientsIds.Count;
 
+        if (playerCount != requiredPlayerCount)
+        {
+            Debug.LogWarning(
+                $"[Relay] StartGame requiere {requiredPlayerCount} jugadores; " +
+                $"actualmente hay {playerCount}."
+            );
+            SetStatus("WAITING FOR PLAYERS...");
+            UpdatePlayerCount();
+            return;
+        }
+
         Debug.Log(
             $"[Relay][HOST] Iniciando {gameSceneName} con " +
             $"{playerCount} jugador(es)."
@@ -324,18 +350,22 @@ public class ConnectionManager : MonoBehaviour
         int currentPlayers =
             NetworkManager.Singleton.ConnectedClientsIds.Count;
 
-        // El host también cuenta como jugador.
-        int totalCapacity = maxClients + 1;
-
         if (playerCountDisplay != null)
         {
             playerCountDisplay.text =
-                $"PLAYERS: {currentPlayers}/{totalCapacity}";
+                $"PLAYERS: {currentPlayers}/{requiredPlayerCount}";
+        }
+
+        if (startGameButton != null)
+        {
+            startGameButton.interactable =
+                NetworkManager.Singleton.IsHost &&
+                currentPlayers == requiredPlayerCount;
         }
 
         Debug.Log(
             $"[Netcode] Jugadores conectados: " +
-            $"{currentPlayers}/{totalCapacity}"
+            $"{currentPlayers}/{requiredPlayerCount}"
         );
     }
 
@@ -357,7 +387,10 @@ public class ConnectionManager : MonoBehaviour
             lobbyPanel.SetActive(true);
 
         if (startGameButton != null)
+        {
             startGameButton.gameObject.SetActive(isHost);
+            startGameButton.interactable = false;
+        }
 
         if (codeDisplay != null)
         {
