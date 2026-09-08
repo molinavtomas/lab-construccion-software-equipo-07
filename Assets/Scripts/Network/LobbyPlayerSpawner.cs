@@ -11,8 +11,11 @@ public class LobbyPlayerSpawner : MonoBehaviour
     [SerializeField] private string gameSceneName = "GameScene";
     [SerializeField] private string spawnPointName = "Respawn";
     [SerializeField] private float playerSpacing = 1.5f;
+    [SerializeField, Min(2)] private int requiredPlayerCount = 2;
 
     private NetworkManager networkManager;
+    private readonly HashSet<ulong> loadedClientIds = new();
+    private bool gameSceneLoadCompletedWithoutTimeout;
 
     private void Awake()
     {
@@ -21,19 +24,24 @@ public class LobbyPlayerSpawner : MonoBehaviour
         networkManager.ConnectionApprovalCallback = ApproveConnection;
         networkManager.OnServerStarted += OnServerStarted;
         networkManager.OnClientConnectedCallback += OnClientConnected;
+        networkManager.OnClientDisconnectCallback += OnClientDisconnected;
     }
 
     private void ApproveConnection(
         NetworkManager.ConnectionApprovalRequest request,
         NetworkManager.ConnectionApprovalResponse response)
     {
-        response.Approved = true;
+        response.Approved =
+            networkManager.ConnectedClientsIds.Count < requiredPlayerCount;
 
         // No crear al jugador mientras permanece en el lobby.
         response.CreatePlayerObject = false;
 
         response.Position = null;
         response.Rotation = null;
+        response.Reason = response.Approved
+            ? string.Empty
+            : "La sala ya tiene dos jugadores.";
         response.Pending = false;
     }
 
@@ -52,10 +60,20 @@ public class LobbyPlayerSpawner : MonoBehaviour
         if (!networkManager.IsServer || sceneName != gameSceneName)
             return;
 
-        foreach (ulong clientId in networkManager.ConnectedClientsIds)
+        loadedClientIds.Clear();
+
+        foreach (ulong clientId in clientsCompleted)
         {
-            SpawnPlayer(clientId);
+            if (networkManager.ConnectedClients.ContainsKey(clientId))
+                loadedClientIds.Add(clientId);
         }
+
+        gameSceneLoadCompletedWithoutTimeout = clientsTimedOut.Count == 0;
+
+        foreach (ulong clientId in loadedClientIds)
+            SpawnPlayer(clientId);
+
+        TryStartRace();
     }
 
     private void OnClientConnected(ulong clientId)
@@ -66,7 +84,13 @@ public class LobbyPlayerSpawner : MonoBehaviour
             SceneManager.GetActiveScene().name == gameSceneName)
         {
             SpawnPlayer(clientId);
+            TryStartRace();
         }
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        loadedClientIds.Remove(clientId);
     }
 
     private void SpawnPlayer(ulong clientId)
@@ -120,6 +144,59 @@ public class LobbyPlayerSpawner : MonoBehaviour
         networkObject.SpawnAsPlayerObject(clientId, true);
     }
 
+    private void TryStartRace()
+    {
+        if (!networkManager.IsServer ||
+            !gameSceneLoadCompletedWithoutTimeout)
+        {
+            return;
+        }
+
+        IReadOnlyList<ulong> connectedClientIds =
+            networkManager.ConnectedClientsIds;
+
+        int loadedPlayerCount = 0;
+        int spawnedPlayerCount = 0;
+
+        foreach (ulong clientId in connectedClientIds)
+        {
+            if (loadedClientIds.Contains(clientId))
+                loadedPlayerCount++;
+
+            if (!networkManager.ConnectedClients.TryGetValue(
+                    clientId, out NetworkClient client))
+            {
+                continue;
+            }
+
+            NetworkObject playerObject = client.PlayerObject;
+
+            if (playerObject != null &&
+                playerObject.IsSpawned &&
+                playerObject.gameObject.scene.name == gameSceneName)
+            {
+                spawnedPlayerCount++;
+            }
+        }
+
+        if (!RaceStartReadiness.ArePlayersReady(
+                requiredPlayerCount,
+                connectedClientIds.Count,
+                loadedPlayerCount,
+                spawnedPlayerCount,
+                0))
+        {
+            return;
+        }
+
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+
+        if (gameManager == null || !gameManager.IsSpawned)
+            return;
+
+        gameManager.IniciarCarrera();
+    }
+
     private void OnDestroy()
     {
         if (networkManager == null)
@@ -127,11 +204,29 @@ public class LobbyPlayerSpawner : MonoBehaviour
 
         networkManager.OnServerStarted -= OnServerStarted;
         networkManager.OnClientConnectedCallback -= OnClientConnected;
+        networkManager.OnClientDisconnectCallback -= OnClientDisconnected;
 
         if (networkManager.SceneManager != null)
         {
             networkManager.SceneManager.OnLoadEventCompleted
                 -= OnLoadEventCompleted;
         }
+    }
+}
+
+public static class RaceStartReadiness
+{
+    public static bool ArePlayersReady(
+        int requiredPlayerCount,
+        int connectedPlayerCount,
+        int loadedPlayerCount,
+        int spawnedPlayerCount,
+        int timedOutPlayerCount)
+    {
+        return requiredPlayerCount > 0 &&
+            timedOutPlayerCount == 0 &&
+            connectedPlayerCount == requiredPlayerCount &&
+            loadedPlayerCount == requiredPlayerCount &&
+            spawnedPlayerCount == requiredPlayerCount;
     }
 }

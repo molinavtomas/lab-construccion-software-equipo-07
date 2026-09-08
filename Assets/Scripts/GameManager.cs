@@ -1,10 +1,31 @@
 using Unity.Netcode;
 using UnityEngine;
 
+public enum EstadoCarrera : byte
+{
+    Esperando,
+    Activa,
+    Finalizada
+}
+
+public static class RaceStateRules
+{
+    public static bool CanStart(EstadoCarrera state)
+    {
+        return state == EstadoCarrera.Esperando;
+    }
+
+    public static bool CanFinish(EstadoCarrera state)
+    {
+        return state == EstadoCarrera.Activa;
+    }
+}
+
 [RequireComponent(typeof(NetworkObject))]
 public class GameManager : NetworkBehaviour
 {
     [Header("Configuración del Nivel")]
+    [Min(0.1f)]
     public float tiempoMaximo = 120f;
 
     [Header("Estado del Juego (Sincronizado)")]
@@ -14,20 +35,28 @@ public class GameManager : NetworkBehaviour
         NetworkVariableWritePermission.Server
     );
 
-    public readonly NetworkVariable<bool> carreraActiva = new(
-        false,
+    public readonly NetworkVariable<EstadoCarrera> estadoCarrera = new(
+        EstadoCarrera.Esperando,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
 
-    private bool juegoTerminado;
+    public bool CarreraActiva => estadoCarrera.Value == EstadoCarrera.Activa;
+
+    public float TiempoRestante => Mathf.Max(
+        0f,
+        tiempoMaximo - tiempoActual.Value
+    );
 
     private void Update()
     {
-        if (!IsSpawned || !IsServer || juegoTerminado || !carreraActiva.Value)
+        if (!IsSpawned || !IsServer || !CarreraActiva)
             return;
 
-        tiempoActual.Value += Time.deltaTime;
+        tiempoActual.Value = Mathf.Min(
+            tiempoMaximo,
+            tiempoActual.Value + Time.deltaTime
+        );
 
         if (tiempoActual.Value >= tiempoMaximo)
             PerderJuegoPorTiempo();
@@ -35,21 +64,23 @@ public class GameManager : NetworkBehaviour
 
     public bool IniciarCarrera()
     {
-        if (!IsServer || juegoTerminado || carreraActiva.Value)
+        if (!IsSpawned || !IsServer ||
+            !RaceStateRules.CanStart(estadoCarrera.Value))
+        {
             return false;
+        }
 
         tiempoActual.Value = 0f;
-        carreraActiva.Value = true;
+        estadoCarrera.Value = EstadoCarrera.Activa;
         return true;
     }
 
     public void RegistrarLlegada(ulong idGanador)
     {
-        if (!IsServer || juegoTerminado || !carreraActiva.Value)
+        if (!IsServer || !RaceStateRules.CanFinish(estadoCarrera.Value))
             return;
 
-        juegoTerminado = true;
-        carreraActiva.Value = false;
+        estadoCarrera.Value = EstadoCarrera.Finalizada;
 
         Debug.Log(
             $"¡El jugador {idGanador} cruzó la meta en " +
@@ -59,11 +90,10 @@ public class GameManager : NetworkBehaviour
 
     public void PerderJuegoPorTiempo()
     {
-        if (!IsServer || juegoTerminado || !carreraActiva.Value)
+        if (!IsServer || !RaceStateRules.CanFinish(estadoCarrera.Value))
             return;
 
-        juegoTerminado = true;
-        carreraActiva.Value = false;
+        estadoCarrera.Value = EstadoCarrera.Finalizada;
 
         Debug.Log("¡Derrota global! Se agotó el tiempo límite para ambos.");
     }
@@ -74,7 +104,6 @@ public class GameManager : NetworkBehaviour
             return;
 
         tiempoActual.Value = 0f;
-        carreraActiva.Value = false;
-        juegoTerminado = false;
+        estadoCarrera.Value = EstadoCarrera.Esperando;
     }
 }

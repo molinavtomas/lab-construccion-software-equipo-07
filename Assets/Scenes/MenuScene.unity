@@ -7373,7 +7373,7 @@ MonoBehaviour:
   playerCountDisplay: {fileID: 611628260}
   startGameButton: {fileID: 1594236924}
   gameSceneName: GameScene
-  maxClients: 4
+  requiredPlayerCount: 2
 --- !u!4 &1559012517
 Transform:
   m_ObjectHideFlags: 0
@@ -8087,6 +8087,7 @@ MonoBehaviour:
   gameSceneName: GameScene
   spawnPointName: Respawn
   playerSpacing: 1.5
+  requiredPlayerCount: 2
 --- !u!1 &1631011259
 GameObject:
   m_ObjectHideFlags: 0
