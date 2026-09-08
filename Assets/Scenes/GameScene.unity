@@ -3263,7 +3263,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 135657391}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 991567741}
+        m_TargetAssemblyTypeName: RaceStatusUI, Game
+        m_MethodName: VolverAlMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &135657391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10157,7 +10169,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 453405744}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 991567741}
+        m_TargetAssemblyTypeName: RaceStatusUI, Game
+        m_MethodName: SalirDelJuego
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &453405744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19728,6 +19752,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::RaceStatusUI
   gameManager: {fileID: 1903377597}
   statusText: {fileID: 1142385911}
+  winScreen: {fileID: 443126208}
+  loseScreen: {fileID: 1477762967}
+  defeatByOpponentMessage: {fileID: 426919775}
+  defeatByTimeMessage: {fileID: 113826449}
+  menuSceneName: MenuScene
 --- !u!1001 &994721092
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20544,7 +20573,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1034174514}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 991567741}
+        m_TargetAssemblyTypeName: RaceStatusUI, Game
+        m_MethodName: VolverAlMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1034174514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -36693,7 +36734,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1739843672}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 991567741}
+        m_TargetAssemblyTypeName: RaceStatusUI, Game
+        m_MethodName: SalirDelJuego
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1739843672
 MonoBehaviour:
   m_ObjectHideFlags: 0

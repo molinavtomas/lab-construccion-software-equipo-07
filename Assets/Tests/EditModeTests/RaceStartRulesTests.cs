@@ -2,13 +2,14 @@ using NUnit.Framework;
 
 public class RaceStartRulesTests
 {
+    [TestCase(1, 1, 1, 1, 0, true)]
     [TestCase(2, 2, 2, 2, 0, true)]
     [TestCase(2, 1, 1, 1, 0, false)]
     [TestCase(2, 2, 1, 1, 0, false)]
     [TestCase(2, 2, 2, 1, 0, false)]
     [TestCase(2, 2, 2, 2, 1, false)]
     [TestCase(2, 3, 2, 2, 0, false)]
-    public void JugadoresListosRequiereDosConectadosCargadosYSpawneados(
+    public void JugadoresListosRequiereCantidadExactaCargadaYSpawneada(
         int requiredPlayers,
         int connectedPlayers,
         int loadedPlayers,

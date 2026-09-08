@@ -91,6 +91,18 @@ public class ConnectionManager : MonoBehaviour
             if (networkManager == null)
                 throw new InvalidOperationException("NetworkManager no encontrado.");
 
+            LobbyPlayerSpawner playerSpawner =
+                networkManager.GetComponent<LobbyPlayerSpawner>();
+
+            if (playerSpawner == null)
+            {
+                throw new InvalidOperationException(
+                    "LobbyPlayerSpawner no encontrado."
+                );
+            }
+
+            playerSpawner.ConfigureRequiredPlayerCount(requiredPlayerCount);
+
             UnityTransport transport =
                 networkManager.GetComponent<UnityTransport>();
 

@@ -11,7 +11,7 @@ public class LobbyPlayerSpawner : MonoBehaviour
     [SerializeField] private string gameSceneName = "GameScene";
     [SerializeField] private string spawnPointName = "Respawn";
     [SerializeField] private float playerSpacing = 1.5f;
-    [SerializeField, Min(2)] private int requiredPlayerCount = 2;
+    [SerializeField, Min(1)] private int requiredPlayerCount = 2;
 
     private NetworkManager networkManager;
     private readonly HashSet<ulong> loadedClientIds = new();
@@ -25,6 +25,19 @@ public class LobbyPlayerSpawner : MonoBehaviour
         networkManager.OnServerStarted += OnServerStarted;
         networkManager.OnClientConnectedCallback += OnClientConnected;
         networkManager.OnClientDisconnectCallback += OnClientDisconnected;
+    }
+
+    public void ConfigureRequiredPlayerCount(int playerCount)
+    {
+        if (networkManager != null && networkManager.IsListening)
+        {
+            Debug.LogWarning(
+                "No se puede cambiar la cantidad de jugadores con la red iniciada."
+            );
+            return;
+        }
+
+        requiredPlayerCount = Mathf.Max(1, playerCount);
     }
 
     private void ApproveConnection(

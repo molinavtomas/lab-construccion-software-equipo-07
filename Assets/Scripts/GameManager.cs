@@ -8,6 +8,21 @@ public enum EstadoCarrera : byte
     Finalizada
 }
 
+public enum MotivoFinalizacionCarrera : byte
+{
+    Ninguno,
+    Llegada,
+    TiempoAgotado
+}
+
+public enum ResultadoCarreraLocal : byte
+{
+    Pendiente,
+    Victoria,
+    DerrotaPorLlegadaRival,
+    DerrotaPorTiempo
+}
+
 public static class RaceStateRules
 {
     public static bool CanStart(EstadoCarrera state)
@@ -21,9 +36,37 @@ public static class RaceStateRules
     }
 }
 
+public static class RaceResultRules
+{
+    public static ResultadoCarreraLocal GetLocalResult(
+        EstadoCarrera state,
+        MotivoFinalizacionCarrera finishReason,
+        ulong winnerClientId,
+        ulong localClientId)
+    {
+        if (state != EstadoCarrera.Finalizada)
+            return ResultadoCarreraLocal.Pendiente;
+
+        if (finishReason == MotivoFinalizacionCarrera.TiempoAgotado)
+            return ResultadoCarreraLocal.DerrotaPorTiempo;
+
+        if (finishReason != MotivoFinalizacionCarrera.Llegada ||
+            winnerClientId == GameManager.SinGanador)
+        {
+            return ResultadoCarreraLocal.Pendiente;
+        }
+
+        return winnerClientId == localClientId
+            ? ResultadoCarreraLocal.Victoria
+            : ResultadoCarreraLocal.DerrotaPorLlegadaRival;
+    }
+}
+
 [RequireComponent(typeof(NetworkObject))]
 public class GameManager : NetworkBehaviour
 {
+    public const ulong SinGanador = ulong.MaxValue;
+
     [Header("Configuración del Nivel")]
     [Min(0.1f)]
     public float tiempoMaximo = 120f;
@@ -37,6 +80,18 @@ public class GameManager : NetworkBehaviour
 
     public readonly NetworkVariable<EstadoCarrera> estadoCarrera = new(
         EstadoCarrera.Esperando,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    public readonly NetworkVariable<MotivoFinalizacionCarrera> motivoFinalizacion = new(
+        MotivoFinalizacionCarrera.Ninguno,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    public readonly NetworkVariable<ulong> idGanador = new(
+        SinGanador,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
@@ -71,6 +126,8 @@ public class GameManager : NetworkBehaviour
         }
 
         tiempoActual.Value = 0f;
+        motivoFinalizacion.Value = MotivoFinalizacionCarrera.Ninguno;
+        idGanador.Value = SinGanador;
         estadoCarrera.Value = EstadoCarrera.Activa;
         return true;
     }
@@ -80,6 +137,8 @@ public class GameManager : NetworkBehaviour
         if (!IsServer || !RaceStateRules.CanFinish(estadoCarrera.Value))
             return;
 
+        this.idGanador.Value = idGanador;
+        motivoFinalizacion.Value = MotivoFinalizacionCarrera.Llegada;
         estadoCarrera.Value = EstadoCarrera.Finalizada;
 
         Debug.Log(
@@ -93,6 +152,8 @@ public class GameManager : NetworkBehaviour
         if (!IsServer || !RaceStateRules.CanFinish(estadoCarrera.Value))
             return;
 
+        idGanador.Value = SinGanador;
+        motivoFinalizacion.Value = MotivoFinalizacionCarrera.TiempoAgotado;
         estadoCarrera.Value = EstadoCarrera.Finalizada;
 
         Debug.Log("¡Derrota global! Se agotó el tiempo límite para ambos.");
@@ -104,6 +165,8 @@ public class GameManager : NetworkBehaviour
             return;
 
         tiempoActual.Value = 0f;
+        motivoFinalizacion.Value = MotivoFinalizacionCarrera.Ninguno;
+        idGanador.Value = SinGanador;
         estadoCarrera.Value = EstadoCarrera.Esperando;
     }
 }
