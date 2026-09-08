@@ -1,0 +1,10 @@
+{
+    "name": "PlayModeTests",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "references": [
+        "Unity.InputSystem",
+        "Game"
+    ]
+}
