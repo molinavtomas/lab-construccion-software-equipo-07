@@ -5,6 +5,10 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class Move : MonoBehaviour
 {
+    [Header("Animaciones")]
+    [Tooltip("Asigna aquí el Animator (si está vacío, se buscará automáticamente en hijos)")]
+    [SerializeField] private Animator anim;
+
     [Header("Movimiento")]
     public float speed = 6f;
     public float runSpeed = 10f;
@@ -36,14 +40,29 @@ public class Move : MonoBehaviour
     private const float MaxWallNormalUpDot = 0.5f;
     private const float SameWallNormalDot = 0.99f;
 
+    // Hashes de parámetros de Animator (más eficiente que usar strings en cada frame)
+    private static readonly int SpeedParam = Animator.StringToHash("Speed");
+    private static readonly int IsGroundedParam = Animator.StringToHash("IsGrounded");
+    private static readonly int JumpParam = Animator.StringToHash("Jump");
+    private static readonly int RunningParam = Animator.StringToHash("Running");
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+
+        if (anim == null)
+            anim = GetComponentInChildren<Animator>();
     }
 
     private void Update()
     {
+        bool grounded = IsGrounded();
+        if (anim != null)
+        {
+            anim.SetBool(IsGroundedParam, grounded);
+            anim.SetBool(RunningParam, running);
+        }
+
         if (!keyboardInputEnabled)
             return;
 
@@ -127,6 +146,11 @@ public class Move : MonoBehaviour
             jumpPressed = false;
         }
 
+        if (anim != null)
+        {
+            Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            anim.SetFloat(SpeedParam, horizontalVelocity.magnitude);
+        }
         // Los callbacks de colision vuelven a llenar la lista despues del
         // siguiente paso de fisica. De esta forma nunca usamos contactos viejos.
         wallContactNormals.Clear();
@@ -284,6 +308,11 @@ public class Move : MonoBehaviour
             Vector3.up * jumpForce,
             ForceMode.Impulse
         );
+
+        if (anim != null)
+        {
+            anim.SetTrigger(JumpParam);
+        }
     }
 
     public bool IsGrounded()
