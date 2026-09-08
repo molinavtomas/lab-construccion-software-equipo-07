@@ -11,6 +11,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     [SerializeField] private Move move;
     [SerializeField] private WallRun wallRun;
     [SerializeField] private Grappling grappling;
+    [SerializeField] private Canvas playerUI;
 
     [Header("Checkpoint")]
     private Vector3 ultimoCheckpointPos;
@@ -49,6 +50,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         if (grappling != null)
             grappling.enabled = esPropietario;
+
+        if (playerUI != null)          
+            playerUI.enabled = esPropietario;
 
         // Guarda la posición inicial como el primer punto seguro
         ultimoCheckpointPos = transform.position;
