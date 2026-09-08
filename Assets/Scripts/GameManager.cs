@@ -1,39 +1,80 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+[RequireComponent(typeof(NetworkObject))]
+public class GameManager : NetworkBehaviour
 {
     [Header("Configuración del Nivel")]
-    public float tiempoMaximo = 60f; // Tiempo límite en segundos para perder
+    public float tiempoMaximo = 120f;
 
-    [Header("Estado del Juego")]
-    public bool juegoTerminado = false;
-    private float tiempoActual = 0f;
+    [Header("Estado del Juego (Sincronizado)")]
+    public readonly NetworkVariable<float> tiempoActual = new(
+        0f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
-    void Update()
+    public readonly NetworkVariable<bool> carreraActiva = new(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    private bool juegoTerminado;
+
+    private void Update()
     {
-        // Si el juego ya terminó, no seguimos contando el tiempo
-        if (juegoTerminado) return;
+        if (!IsSpawned || !IsServer || juegoTerminado || !carreraActiva.Value)
+            return;
 
-        tiempoActual += Time.deltaTime;
+        tiempoActual.Value += Time.deltaTime;
 
-        // Condición de derrota: se acabó el tiempo
-        if (tiempoActual >= tiempoMaximo)
-        {
-            PerderJuego();
-        }
+        if (tiempoActual.Value >= tiempoMaximo)
+            PerderJuegoPorTiempo();
     }
 
-    public void GanarJuego()
+    public bool IniciarCarrera()
     {
-        juegoTerminado = true;
-        Debug.Log($"¡Llegaste a la meta! Tiempo total: {tiempoActual:F2} segundos.");
-        // Más adelante acá podés agregar la interfaz de victoria
+        if (!IsServer || juegoTerminado || carreraActiva.Value)
+            return false;
+
+        tiempoActual.Value = 0f;
+        carreraActiva.Value = true;
+        return true;
     }
 
-    public void PerderJuego()
+    public void RegistrarLlegada(ulong idGanador)
     {
+        if (!IsServer || juegoTerminado || !carreraActiva.Value)
+            return;
+
         juegoTerminado = true;
-        Debug.Log("¡Derrota! Se agotó el tiempo límite.");
-        // Más adelante acá podés reiniciar la escena
+        carreraActiva.Value = false;
+
+        Debug.Log(
+            $"¡El jugador {idGanador} cruzó la meta en " +
+            $"{tiempoActual.Value:F2} segundos!"
+        );
+    }
+
+    public void PerderJuegoPorTiempo()
+    {
+        if (!IsServer || juegoTerminado || !carreraActiva.Value)
+            return;
+
+        juegoTerminado = true;
+        carreraActiva.Value = false;
+
+        Debug.Log("¡Derrota global! Se agotó el tiempo límite para ambos.");
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer)
+            return;
+
+        tiempoActual.Value = 0f;
+        carreraActiva.Value = false;
+        juegoTerminado = false;
     }
 }
