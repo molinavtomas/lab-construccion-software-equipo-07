@@ -107,13 +107,12 @@ public class SpeedBoostController : NetworkBehaviour
 
             boostStyle.normal.textColor = new Color(0.25f, 1f, 0.95f);
         }
-
         Rect statusRect = new Rect(
-            Screen.width * 0.5f - 150f,
-            24f,
-            300f,
-            58f
-        );
+                    Screen.width * 0.5f - 150f,
+                    120f, // Lo bajamos para que no choque con el tiempo
+                    300f,
+                    58f
+                );
 
         GUI.Box(
             statusRect,
