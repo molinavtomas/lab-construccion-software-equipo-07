@@ -5,6 +5,7 @@
     ],
     "references": [
         "Unity.InputSystem",
+        "Unity.InputSystem.TestFramework",
         "Game"
     ]
 }
