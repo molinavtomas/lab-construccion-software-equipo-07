@@ -15,7 +15,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     [Header("Checkpoint")]
     private Vector3 ultimoCheckpointPos;
-    private Quaternion ultimoCheckpointRot;
+    private Quaternion ultimoCheckpointRot = Quaternion.identity;
 
     private Rigidbody playerRigidbody;
     private NetworkTransform networkTransform;
@@ -27,6 +27,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     {
         playerRigidbody = GetComponent<Rigidbody>();
         networkTransform = GetComponent<NetworkTransform>();
+        GuardarCheckpointInicial();
     }
 
     public override void OnNetworkSpawn()
@@ -54,9 +55,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (playerUI != null)          
             playerUI.enabled = esPropietario;
 
-        // Guarda la posición inicial como el primer punto seguro
-        ultimoCheckpointPos = transform.position;
-        ultimoCheckpointRot = transform.rotation;
+        // Al conectarse, actualiza el punto seguro con la posición de red definitiva.
+        GuardarCheckpointInicial();
     }
 
     public void Respawn(Vector3 position, Quaternion rotation)
@@ -92,16 +92,21 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (IsSpawned && !IsOwner)
             return;
 
+        Quaternion validRotation = GetValidRotation(rotation);
+
         if (playerRigidbody != null)
         {
             playerRigidbody.linearVelocity = Vector3.zero;
             playerRigidbody.angularVelocity = Vector3.zero;
             playerRigidbody.position = position;
-            playerRigidbody.rotation = rotation;
+            playerRigidbody.rotation = validRotation;
+
+            if (!IsSpawned)
+                transform.SetPositionAndRotation(position, validRotation);
         }
         else
         {
-            transform.SetPositionAndRotation(position, rotation);
+            transform.SetPositionAndRotation(position, validRotation);
         }
 
         // Teleport evita que la interpolacion recorra visualmente toda la
@@ -110,10 +115,40 @@ public class PlayerNetworkSetup : NetworkBehaviour
         {
             networkTransform.Teleport(
                 position,
-                rotation,
+                validRotation,
                 transform.localScale
             );
         }
+    }
+
+    private void GuardarCheckpointInicial()
+    {
+        ultimoCheckpointPos = transform.position;
+        ultimoCheckpointRot = GetValidRotation(transform.rotation);
+    }
+
+    private static Quaternion GetValidRotation(Quaternion rotation)
+    {
+        float sqrMagnitude =
+            rotation.x * rotation.x +
+            rotation.y * rotation.y +
+            rotation.z * rotation.z +
+            rotation.w * rotation.w;
+
+        if (float.IsNaN(sqrMagnitude) ||
+            float.IsInfinity(sqrMagnitude) ||
+            sqrMagnitude <= Mathf.Epsilon)
+        {
+            return Quaternion.identity;
+        }
+
+        float inverseMagnitude = 1f / Mathf.Sqrt(sqrMagnitude);
+        return new Quaternion(
+            rotation.x * inverseMagnitude,
+            rotation.y * inverseMagnitude,
+            rotation.z * inverseMagnitude,
+            rotation.w * inverseMagnitude
+        );
     }
 
     // --- NUEVOS MÉTODOS PARA CHECKPOINTS ---
@@ -121,7 +156,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     public void GuardarCheckpoint(Vector3 nuevaPos, Quaternion nuevaRot)
     {
         ultimoCheckpointPos = nuevaPos;
-        ultimoCheckpointRot = nuevaRot;
+        ultimoCheckpointRot = GetValidRotation(nuevaRot);
         Debug.Log("¡Checkpoint guardado exitosamente!");
     }
 
