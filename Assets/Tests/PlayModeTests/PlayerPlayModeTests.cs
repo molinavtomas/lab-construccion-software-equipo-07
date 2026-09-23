@@ -970,16 +970,7 @@ public class PlayerPlayModeTests
 
             tiempo += Time.fixedDeltaTime;
 
-            RaycastHit suelo;
-
-            bool haySuelo = Physics.Raycast(
-                player.transform.position,
-                Vector3.down,
-                out suelo,
-                1.1f
-            );
-
-            if (haySuelo &&
+            if (move.IsGrounded() &&
                 Mathf.Abs(rb.linearVelocity.y) < 0.1f)
             {
                 jugadorEstabilizado = true;
@@ -989,7 +980,9 @@ public class PlayerPlayModeTests
 
         Assert.IsTrue(
             jugadorEstabilizado,
-            "El jugador no logró estabilizarse sobre una superficie después del respawn."
+            "El jugador no logró estabilizarse sobre una superficie después del respawn. " +
+            $"Posición: {player.transform.position}; " +
+            $"velocidad: {rb.linearVelocity}; grounded: {move.IsGrounded()}."
         );
 
         Debug.Log(
@@ -1047,16 +1040,7 @@ public class PlayerPlayModeTests
 
             tiempo += Time.fixedDeltaTime;
 
-            RaycastHit suelo;
-
-            bool haySuelo = Physics.Raycast(
-                player.transform.position,
-                Vector3.down,
-                out suelo,
-                1.1f
-            );
-
-            if (haySuelo &&
+            if (move.IsGrounded() &&
                 Mathf.Abs(rb.linearVelocity.y) < 0.1f)
             {
                 jugadorEstabilizado = true;
@@ -1073,14 +1057,7 @@ public class PlayerPlayModeTests
         // 10. Verificar suelo antes del salto
         // ==================================================
 
-        RaycastHit hit;
-
-        bool sueloAntesSalto = Physics.Raycast(
-            player.transform.position,
-            Vector3.down,
-            out hit,
-            1.1f
-        );
+        bool sueloAntesSalto = move.IsGrounded();
 
         Assert.IsTrue(
             sueloAntesSalto,
