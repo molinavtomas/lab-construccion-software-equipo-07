@@ -102,13 +102,6 @@ The current playable artifact targets **Windows 64-bit** and is distributed as a
 3. Run `Build/TpProyectoUnity.exe`.
 4. For multiplayer, start a host, share the join code and connect from a second instance or computer.
 
-The published archive was verified to contain the executable and its matching Unity data folder. Its SHA-256 checksum is:
-
-```text
-C3C90DB136661953963FED994B4DD0C1F4D01A890C27BD7C45093C9C7D094E00
-```
-
-Detailed setup and troubleshooting are available in the [build guide](docs/BUILD.md).
 
 ## Testing and evidence
 
