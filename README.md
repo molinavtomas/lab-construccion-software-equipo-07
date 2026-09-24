@@ -1,130 +1,141 @@
 <p align="center">
-  <img src="Assets/Utils/UrbanRunnerPortada.png" alt="Urban Freerunner key art" width="100%">
+  <img src="Assets/Utils/UrbanRunnerPortada.png" alt="Portada de Urban Freerunner" width="100%">
 </p>
 
 <h1 align="center">Urban Freerunner</h1>
 
 <p align="center">
-  A two-player online parkour race built with Unity, C#, Netcode for GameObjects and Relay.
+  Carrera de parkour multijugador para dos personas, desarrollada con Unity, C#, Netcode for GameObjects y Relay.
 </p>
 
 <p align="center">
   <img alt="Unity 6000.3.22f1" src="https://img.shields.io/badge/Unity-6000.3.22f1-000000?logo=unity&logoColor=white">
   <img alt="C Sharp" src="https://img.shields.io/badge/C%23-gameplay-512BD4?logo=csharp&logoColor=white">
   <img alt="Windows" src="https://img.shields.io/badge/Build-Windows%2064--bit-0078D6?logo=windows&logoColor=white">
-  <img alt="Netcode" src="https://img.shields.io/badge/Multiplayer-Netcode%20%2B%20Relay-1F6FEB">
-  <a href="https://github.com/molinavtomas/lab-construccion-software-equipo-07/actions/workflows/unity-tests.yml"><img alt="Unity tests" src="https://github.com/molinavtomas/lab-construccion-software-equipo-07/actions/workflows/unity-tests.yml/badge.svg?branch=develop"></a>
+  <img alt="Multijugador" src="https://img.shields.io/badge/Multijugador-Netcode%20%2B%20Relay-1F6FEB">
+  <a href="https://github.com/molinavtomas/lab-construccion-software-equipo-07/actions/workflows/unity-tests.yml"><img alt="Pruebas de Unity" src="https://github.com/molinavtomas/lab-construccion-software-equipo-07/actions/workflows/unity-tests.yml/badge.svg?branch=develop"></a>
 </p>
 
 <p align="center">
-  <a href="https://drive.google.com/file/d/1HQryq3KlAKxBWZM-q3UTxLFiFKtaSVCI/view?usp=sharing"><strong>Download the playable build</strong></a>
+  <a href="https://drive.google.com/file/d/1HQryq3KlAKxBWZM-q3UTxLFiFKtaSVCI/view?usp=sharing"><strong>Descargar la build jugable</strong></a>
   ·
-  <a href="docs/BUILD.md">Build guide</a>
+  <a href="docs/BUILD.md">Guía de instalación</a>
   ·
-  <a href="docs/ARCHITECTURE.md">Architecture</a>
+  <a href="docs/ARCHITECTURE.md">Arquitectura</a>
   ·
-  <a href="docs/TESTING.md">Testing and CI</a>
+  <a href="docs/TESTING.md">Pruebas y CI</a>
+  ·
+  <a href="https://docs.google.com/spreadsheets/d/1HyE2hVOfY0tSBOdW02WvCWOdlR_yjt9laemHNITDczw/edit?usp=sharing"><strong>Suite de QA y resultados</strong></a>
 </p>
 
-## About the game
+## Sobre el juego
 
-Urban Freerunner is an academic multiplayer prototype developed over four sprints by a five-person team. Two players join the same online session and race through an urban obstacle course using movement, jumping, sprinting, wall running and a grappling hook.
+Urban Freerunner es un prototipo académico multijugador desarrollado durante cuatro sprints por un equipo de cinco integrantes. Dos jugadores ingresan a una misma sesión en línea y compiten en un circuito urbano de obstáculos mediante movimiento, salto, carrera, wall running y un gancho.
 
-The host creates a Relay session and shares a short join code. Once both players have loaded and spawned, the server starts a shared 180-second race. The first valid finish wins; if time expires, both players lose. Falls return the player to the latest checkpoint without stopping the clock.
+El host crea una sesión de Relay y comparte un código de acceso. Cuando ambos jugadores terminaron de cargar y fueron instanciados, el servidor inicia una carrera compartida de 180 segundos. La primera llegada válida gana; si el tiempo termina, ambos jugadores pierden. Las caídas devuelven al jugador al último checkpoint sin detener el reloj.
 
-## Highlights
+## Características principales
 
-- Online host/client flow using Unity Relay, Unity Transport and anonymous authentication.
-- Join-code lobby with player count, connection status and host-only start controls.
-- Deferred network spawning after synchronized scene loading.
-- Owner-specific input, camera, audio and UI activation.
-- Server-controlled race start, timer, result validation and shared win/loss state.
-- Parkour movement, wall running, grappling, checkpoints, respawn and speed boosts.
-- Automated EditMode and PlayMode suites executed through GitHub Actions and GameCI.
+- Flujo host/cliente en línea mediante Unity Relay, Unity Transport y autenticación anónima.
+- Lobby por código con cantidad de jugadores, estado de conexión y controles exclusivos del host.
+- Instanciación de jugadores después de sincronizar la carga de la escena.
+- Activación de entrada, cámara, audio e interfaz únicamente para el jugador propietario.
+- Inicio, temporizador, validación del resultado y estado de victoria o derrota controlados por el servidor.
+- Movimiento de parkour, wall running, gancho, checkpoints, respawn y mejoras temporales de velocidad.
+- Suites automatizadas de EditMode y PlayMode ejecutadas mediante GitHub Actions y GameCI.
+- Proceso de QA documentado con trazabilidad, ejecución manual y evidencias por sprint.
 
-## Technology
+## Tecnologías
 
-| Area | Tools |
+| Área | Herramientas |
 | --- | --- |
-| Engine | Unity `6000.3.22f1`, Universal Render Pipeline |
-| Language | C# |
-| Multiplayer | Netcode for GameObjects, Unity Transport, Unity Relay |
-| Input and UI | Unity Input System, uGUI, TextMesh Pro |
-| Quality | Unity Test Framework, NUnit, GameCI |
-| Collaboration | Git, GitHub, pull requests and sprint-based development |
+| Motor | Unity `6000.3.22f1`, Universal Render Pipeline |
+| Lenguaje | C# |
+| Multijugador | Netcode for GameObjects, Unity Transport, Unity Relay |
+| Entrada e interfaz | Unity Input System, uGUI, TextMesh Pro |
+| Calidad | Unity Test Framework, NUnit, pruebas manuales, GameCI |
+| Colaboración | Git, GitHub, pull requests y desarrollo por sprints |
 
-## Multiplayer flow
+## Flujo multijugador
 
 ```mermaid
 sequenceDiagram
     participant H as Host
     participant R as Unity Relay
-    participant C as Client
-    participant G as Game server
+    participant C as Cliente
+    participant G as Servidor de juego
 
-    H->>R: Create allocation
-    R-->>H: Join code
-    C->>R: Join with code
-    R-->>H: Client connected
-    H->>G: Load GameScene
-    G->>G: Wait for both players to load and spawn
-    G-->>H: Start shared race
-    G-->>C: Replicate race state and result
+    H->>R: Crea una asignación
+    R-->>H: Devuelve el código de acceso
+    C->>R: Ingresa con el código
+    R-->>H: Confirma la conexión del cliente
+    H->>G: Carga GameScene
+    G->>G: Espera carga e instanciación de ambos jugadores
+    G-->>H: Inicia la carrera compartida
+    G-->>C: Replica el estado y el resultado
 ```
 
-See [Architecture](docs/ARCHITECTURE.md) for the component map and authority model.
+La [documentación de arquitectura](docs/ARCHITECTURE.md) incluye el mapa de componentes y el modelo de autoridad.
 
-## Gameplay rules
+## Reglas de la partida
 
-- **Players:** exactly two in the tested multiplayer flow.
-- **Objective:** reach the finish line before the other player.
-- **Time limit:** 180 seconds.
-- **Finish:** the first valid finish event processed by the server wins.
-- **Timeout:** both players lose if no valid finish is registered.
-- **Recovery:** falling respawns the player at the latest checkpoint while the timer continues.
+- **Jugadores:** exactamente dos en el flujo multijugador validado.
+- **Objetivo:** llegar a la meta antes que el rival.
+- **Límite de tiempo:** 180 segundos.
+- **Llegada:** gana el primer evento válido procesado por el servidor.
+- **Fin del tiempo:** ambos jugadores pierden si no se registró una llegada válida.
+- **Recuperación:** una caída devuelve al jugador al último checkpoint y el temporizador continúa.
 
-### Controls
+### Controles
 
-| Action | Input |
+| Acción | Entrada |
 | --- | --- |
-| Move | `W`, `A`, `S`, `D` |
-| Sprint | `Left Shift` |
-| Jump | `Space` |
-| Look | Mouse |
-| Grappling hook | Right mouse button |
+| Movimiento | `W`, `A`, `S`, `D` |
+| Correr | `Shift izquierdo` |
+| Saltar | `Espacio` |
+| Mirar | Mouse |
+| Gancho | Botón derecho del mouse |
 
-## Build
+## Build jugable
 
-The current playable artifact targets **Windows 64-bit** and is distributed as a 124.2 MiB RAR archive.
+La build publicada está preparada para **Windows de 64 bits** y se distribuye como un archivo RAR de 124,2 MiB.
 
-1. [Download `Build.rar`](https://drive.google.com/file/d/1HQryq3KlAKxBWZM-q3UTxLFiFKtaSVCI/view?usp=sharing).
-2. Extract the complete archive.
-3. Run `Build/TpProyectoUnity.exe`.
-4. For multiplayer, start a host, share the join code and connect from a second instance or computer.
+1. [Descargar `Build.rar`](https://drive.google.com/file/d/1HQryq3KlAKxBWZM-q3UTxLFiFKtaSVCI/view?usp=sharing).
+2. Extraer el archivo completo.
+3. Ejecutar `Build/TpProyectoUnity.exe`.
+4. Para jugar en red, iniciar como host, compartir el código y conectarse desde una segunda instancia o computadora.
 
+## Pruebas y evidencias
 
-## Testing and evidence
+El proyecto combina Unity Test Framework con pruebas manuales multijugador, trazabilidad de criterios de aceptación y evidencias registradas durante los Sprints 2, 3 y 4.
 
-The repository contains focused EditMode and PlayMode coverage for race rules, player readiness, movement, respawn, wall collisions, speed boosts and integrated gameplay configuration. The CI workflow runs both test modes independently and preserves their results as build artifacts.
+| Sprint | Casos documentados | Aprobados | Fallidos | Bloqueados | Pendientes |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Sprint 2 | 18 | 14 | 3 | 0 | 1 |
+| Sprint 3 | 30 | 27 | 1 | 2 | 0 |
+| Sprint 4 | 27 | 27 | 0 | 0 | 0 |
+| **Total** | **75** | **68** | **4** | **2** | **1** |
+
+La [suite consolidada de QA y resultados](https://docs.google.com/spreadsheets/d/1HyE2hVOfY0tSBOdW02WvCWOdlR_yjt9laemHNITDczw/edit?usp=sharing) reúne los 75 casos, 75 registros de ejecución, 38 criterios de aceptación y 44 enlaces directos a evidencias. También conserva en una pestaña separada los cruces de IDs y fechas que requieren revisión, sin completar información que no está respaldada por los archivos originales.
 
 <p align="center">
-  <img src="docs/images/multiplayer-result-evidence.jpg" alt="Two Unity instances displaying the synchronized multiplayer race result during QA" width="850">
+  <img src="docs/images/multiplayer-result-evidence.jpg" alt="Dos instancias de Unity mostrando el resultado sincronizado de una carrera multijugador" width="850">
 </p>
 
-<p align="center"><em>Actual QA capture: two instances receive the same server-resolved race outcome.</em></p>
+<p align="center"><em>Captura real de QA: ambas instancias reciben el resultado resuelto por el servidor.</em></p>
 
-See [Testing and CI](docs/TESTING.md) for the suite structure and validation scope.
+La [documentación de pruebas y CI](docs/TESTING.md) explica la cobertura automatizada, el flujo local y la validación multijugador.
 
-## Team
+## Equipo
 
-| Member | Main focus |
+| Integrante | Enfoque principal |
 | --- | --- |
-| Felipe Dellutri | Gameplay development |
-| Juan Ignacio Gallardo | Game and level design |
-| Bruno Masdeu | Scrum Master, management and documentation |
-| Tomás Molina Varas | Multiplayer integration, automated testing and CI |
-| Sebastián Souza | Gameplay development |
+| Felipe Dellutri | Desarrollo de gameplay |
+| Juan Ignacio Gallardo | Diseño de juego y niveles |
+| Bruno Masdeu | Scrum Master, gestión y documentación |
+| Tomás Molina Varas | Integración multijugador, pruebas automatizadas y CI |
+| Sebastián Souza | Desarrollo de gameplay |
 
-## Project status
+## Estado del proyecto
 
-This is a completed academic prototype, not a commercial release. The validated scope is a two-player Windows experience using Relay. Matchmaking, persistence, progression, anti-cheat and production-scale backend infrastructure are outside the project scope.
+El proyecto es un prototipo académico finalizado, no un lanzamiento comercial. El alcance validado corresponde a una experiencia para dos jugadores en Windows mediante Relay. Matchmaking, persistencia, progresión, anti-cheat e infraestructura backend a escala de producción quedan fuera del alcance.

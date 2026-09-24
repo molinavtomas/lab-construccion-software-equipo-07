@@ -1,60 +1,60 @@
-# Urban Freerunner — Architecture
+# Urban Freerunner — Arquitectura
 
-## System overview
+## Vista general
 
-Urban Freerunner uses a host/client topology built with Netcode for GameObjects, Unity Transport and Unity Relay. Relay provides connectivity through a join code; it is not used as matchmaking or as a persistent lobby service.
+Urban Freerunner utiliza una topología host/cliente construida con Netcode for GameObjects, Unity Transport y Unity Relay. Relay permite establecer la conexión mediante un código; no funciona como sistema de matchmaking ni como lobby persistente.
 
 ```mermaid
 flowchart LR
-    Host[Host player] -->|creates allocation| Relay[Unity Relay]
-    Client[Client player] -->|joins with code| Relay
+    Host[Jugador host] -->|crea una asignación| Relay[Unity Relay]
+    Client[Jugador cliente] -->|ingresa con el código| Relay
     Relay --> Transport[Unity Transport]
     Transport --> NGO[Netcode for GameObjects]
-    NGO --> Session[Connection and scene lifecycle]
-    Session --> Players[Network player objects]
-    Session --> Race[Authoritative race state]
-    Race --> UI[Replicated timer and result UI]
+    NGO --> Session[Ciclo de conexión y escenas]
+    Session --> Players[Objetos de jugador en red]
+    Session --> Race[Estado autoritativo de la carrera]
+    Race --> UI[Temporizador y resultado replicados]
 ```
 
-## Core components
+## Componentes principales
 
-| Component | Responsibility |
+| Componente | Responsabilidad |
 | --- | --- |
-| [`ConnectionManager`](../Assets/Scripts/ConnectionManager.cs) | Initializes Unity Services, authenticates anonymously, creates or joins Relay allocations and controls the lobby UI. |
-| [`LobbyPlayerSpawner`](../Assets/Scripts/Network/LobbyPlayerSpawner.cs) | Approves connections, waits for the synchronized game-scene load, spawns one player per client and starts the race when both players are ready. |
-| [`PlayerNetworkSetup`](../Assets/Scripts/Network/PlayerNetworkSetup.cs) | Enables input, camera, audio and UI only for the owning player; coordinates network-safe respawn behavior. |
-| [`GameManager`](../Assets/Scripts/GameManager.cs) | Owns the shared race lifecycle, timer, finish validation and final result. |
-| [`RaceStatusUI`](../Assets/Scripts/RaceStatusUI.cs) | Displays the replicated race status and outcome to each client. |
-| [`SpeedBoostController`](../Assets/Scripts/Network/SpeedBoostController.cs) | Applies a timed speed multiplier using server time and replicated network variables. |
+| [`ConnectionManager`](../Assets/Scripts/ConnectionManager.cs) | Inicializa Unity Services, autentica de forma anónima, crea o utiliza asignaciones de Relay y controla la interfaz del lobby. |
+| [`LobbyPlayerSpawner`](../Assets/Scripts/Network/LobbyPlayerSpawner.cs) | Aprueba conexiones, espera la carga sincronizada de la escena, instancia un jugador por cliente e inicia la carrera cuando ambos están listos. |
+| [`PlayerNetworkSetup`](../Assets/Scripts/Network/PlayerNetworkSetup.cs) | Habilita entrada, cámara, audio e interfaz únicamente para el propietario y coordina el respawn seguro en red. |
+| [`GameManager`](../Assets/Scripts/GameManager.cs) | Controla el ciclo compartido de la carrera, el temporizador, la validación de llegada y el resultado final. |
+| [`RaceStatusUI`](../Assets/Scripts/RaceStatusUI.cs) | Muestra a cada cliente el estado y el resultado replicados. |
+| [`SpeedBoostController`](../Assets/Scripts/Network/SpeedBoostController.cs) | Aplica un multiplicador temporal de velocidad mediante el tiempo del servidor y variables de red replicadas. |
 
-## Scene flow
+## Flujo de escenas
 
 ```mermaid
 stateDiagram-v2
     [*] --> MenuScene
-    MenuScene --> RelaySession: Host creates or client joins
-    RelaySession --> GameScene: Host starts with two players
-    GameScene --> Waiting: Scene load and network spawn
-    Waiting --> Active: Both players ready
-    Active --> Finished: Valid finish or timeout
-    Finished --> MenuScene: Return to menu
+    MenuScene --> RelaySession: El host crea o el cliente ingresa
+    RelaySession --> GameScene: El host inicia con dos jugadores
+    GameScene --> Waiting: Carga de escena e instanciación
+    Waiting --> Active: Ambos jugadores listos
+    Active --> Finished: Llegada válida o fin del tiempo
+    Finished --> MenuScene: Regreso al menú
 ```
 
-`MenuScene` contains the network session and lobby flow. `GameScene` contains the course, spawn point, race systems and networked players.
+`MenuScene` contiene la sesión de red y el lobby. `GameScene` contiene el circuito, el punto de aparición, los sistemas de carrera y los jugadores en red.
 
-## Authority model
+## Modelo de autoridad
 
-- The host/server owns connection approval, synchronized scene loading and the race lifecycle.
-- Each player only enables local input, camera, audio and HUD for its own `NetworkObject`.
-- Race start, timeout and final result are accepted by the server and replicated to both players.
-- Player movement remains responsive for the owning client and is synchronized through Netcode components.
-- Respawn requests are validated through the network setup before teleporting the owning player to a safe checkpoint.
+- El host/servidor controla la aprobación de conexiones, la carga sincronizada de escenas y el ciclo de la carrera.
+- Cada cliente habilita entrada, cámara, audio y HUD solamente para su propio `NetworkObject`.
+- El servidor acepta el inicio, el fin del tiempo y el resultado final, y los replica a ambos jugadores.
+- El movimiento se mantiene responsivo para el propietario y se sincroniza mediante los componentes de Netcode.
+- Las solicitudes de respawn pasan por la configuración de red antes de trasladar al jugador a un checkpoint seguro.
 
-This separation prevents a remote player from driving another player's local controls and keeps the match outcome consistent across clients.
+Esta separación evita que un jugador remoto controle las entradas locales de otro y mantiene un resultado consistente entre clientes.
 
-## Scope and trade-offs
+## Alcance y decisiones de diseño
 
-- The validated session size is two players.
-- Relay provides connectivity; the project does not implement searchable lobbies or matchmaking.
-- Authentication is anonymous and no account, progression or persistent match history is stored.
-- The project prioritizes a complete academic gameplay loop over production backend scalability or anti-cheat protection.
+- El tamaño de sesión validado es de dos jugadores.
+- Relay aporta conectividad; el proyecto no implementa lobbies buscables ni matchmaking.
+- La autenticación es anónima y no se almacenan cuentas, progresión ni historial persistente de partidas.
+- El proyecto prioriza un ciclo de gameplay académico completo frente a la escalabilidad de backend o la protección anti-cheat de producción.

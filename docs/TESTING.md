@@ -1,8 +1,8 @@
-# Urban Freerunner — Testing and CI
+# Urban Freerunner — Pruebas y CI
 
-## Strategy
+## Estrategia
 
-The project combines automated Unity Test Framework suites with manual multiplayer evidence gathered during each sprint.
+El proyecto combina suites automatizadas de Unity Test Framework con pruebas manuales multijugador, trazabilidad de criterios de aceptación y evidencias reunidas durante cada sprint.
 
 ```text
 Assets/Tests/
@@ -19,43 +19,58 @@ Assets/Tests/
     └── WallCollisionResponseTests.cs
 ```
 
-Example and infrastructure-validation tests remain in the repository as part of the project's testing evolution. For that reason, the portfolio describes the covered behaviors instead of presenting every annotated test method as an independent product requirement.
+El repositorio también conserva pruebas de ejemplo y de validación de infraestructura como parte de la evolución del proyecto. Por ese motivo, la presentación describe los comportamientos cubiertos en lugar de tratar cada método anotado como un requisito de producto independiente.
 
-## Automated coverage
+## Cobertura automatizada
 
-| Area | Examples |
+| Área | Ejemplos |
 | --- | --- |
-| Race readiness | Required player count, scene-load completion, spawned-player readiness and timeout rejection |
-| Race result rules | Valid finish events, duplicate or late events, winner/loser resolution and timeout behavior |
-| Player lifecycle | Ownership setup, fall detection, checkpoint respawn and velocity reset |
-| Movement | Running, jumping, collision response and wall behavior |
-| Power-ups | Server-side validation, shared server time and speed reset |
-| Configuration | Required scenes, prefabs, components and sprint acceptance conditions |
+| Preparación de la carrera | Cantidad requerida de jugadores, carga de escena, jugadores instanciados y rechazo por timeout |
+| Reglas de resultado | Llegadas válidas, eventos duplicados o tardíos, resolución de ganador/perdedor y fin del tiempo |
+| Ciclo del jugador | Configuración de propiedad, detección de caída, respawn en checkpoint y reinicio de velocidad |
+| Movimiento | Carrera, salto, respuesta a colisiones y comportamiento en paredes |
+| Mejoras de velocidad | Validación en servidor, tiempo compartido y recuperación de velocidad |
+| Configuración | Escenas, prefabs, componentes y condiciones de aceptación requeridas |
 
-## Continuous integration
+## Suite consolidada
 
-The workflow at [`.github/workflows/unity-tests.yml`](../.github/workflows/unity-tests.yml) uses GameCI's Unity Test Runner.
+La [suite de QA y resultados](https://docs.google.com/spreadsheets/d/1HyE2hVOfY0tSBOdW02WvCWOdlR_yjt9laemHNITDczw/edit?usp=sharing) reúne en un único Google Sheet los libros de los Sprints 2, 3 y 4.
 
-- Runs on pushes to `develop`.
-- Runs on pull requests targeting `develop`.
-- Executes EditMode and PlayMode as separate matrix jobs.
-- Uses Git LFS during checkout.
-- Uploads test results as GitHub Actions artifacts even when a job fails.
+| Sprint | Casos | Registros | Aprobados | Fallidos | Bloqueados | Pendientes |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Sprint 2 | 18 | 18 | 14 | 3 | 0 | 1 |
+| Sprint 3 | 30 | 30 | 27 | 1 | 2 | 0 |
+| Sprint 4 | 27 | 27 | 27 | 0 | 0 | 0 |
+| **Total** | **75** | **75** | **68** | **4** | **2** | **1** |
 
-[View the Unity test workflow](https://github.com/molinavtomas/lab-construccion-software-equipo-07/actions/workflows/unity-tests.yml)
+La clasificación de la fuente identifica 15 casos manuales, 13 parcialmente automatizables y 47 automatizables. El consolidado contiene además 38 criterios de aceptación y 44 enlaces directos a evidencias.
 
-## Run locally
+Los archivos originales presentan algunos cruces de IDs, saltos de numeración y una fecha que requiere confirmación. Esos puntos permanecen visibles en la pestaña `Hallazgos`; no se reasignaron ni completaron casos sin respaldo documental.
 
-1. Open the project with Unity `6000.3.22f1`.
-2. Open **Window → General → Test Runner**.
-3. Run the EditMode suite.
-4. Run the PlayMode suite.
-5. Review failures together with the Unity Console and the relevant scene or prefab configuration.
+## Integración continua
 
-## Multiplayer evidence
+El workflow [`.github/workflows/unity-tests.yml`](../.github/workflows/unity-tests.yml) utiliza Unity Test Runner de GameCI.
 
-Automated tests cover deterministic rules and component behavior. The full host/client flow was also exercised with two running instances to validate Relay connection, player ownership, synchronized scene loading, race completion and shared results.
+- Se ejecuta con cada push a `develop`.
+- Se ejecuta en pull requests dirigidos a `develop`.
+- Ejecuta EditMode y PlayMode como trabajos independientes de una matriz.
+- Utiliza Git LFS durante el checkout.
+- Conserva los resultados como artefactos de GitHub Actions incluso cuando un trabajo falla.
 
-![Two instances displaying the synchronized multiplayer result](images/multiplayer-result-evidence.jpg)
+[Ver el workflow de pruebas de Unity](https://github.com/molinavtomas/lab-construccion-software-equipo-07/actions/workflows/unity-tests.yml)
 
-The image is a frame from the Sprint 4 QA evidence and shows both instances after the server resolved the race outcome.
+## Ejecución local
+
+1. Abrir el proyecto con Unity `6000.3.22f1`.
+2. Abrir **Window → General → Test Runner**.
+3. Ejecutar la suite de EditMode.
+4. Ejecutar la suite de PlayMode.
+5. Revisar los fallos junto con la consola de Unity y la configuración de la escena o prefab correspondiente.
+
+## Evidencia multijugador
+
+Las pruebas automatizadas cubren reglas deterministas y comportamiento de componentes. El flujo host/cliente completo también se ejecutó con dos instancias para validar la conexión mediante Relay, la propiedad de jugadores, la carga sincronizada, el cierre de la carrera y el resultado compartido.
+
+![Dos instancias mostrando el resultado multijugador sincronizado](images/multiplayer-result-evidence.jpg)
+
+La imagen corresponde a un cuadro de la evidencia de QA del Sprint 4 y muestra ambas instancias después de que el servidor resolvió el resultado de la carrera.
